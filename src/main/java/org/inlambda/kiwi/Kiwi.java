@@ -27,14 +27,18 @@ package org.inlambda.kiwi;
 import lombok.experimental.UtilityClass;
 import org.inlambda.kiwi.lazy.LazyFunction;
 import org.inlambda.kiwi.lazy.LazySupplier;
+import org.inlambda.kiwi.proxy.DenyProxy;
+import org.inlambda.kiwi.proxy.LazyProxy;
 import org.inlambda.kiwi.reflection.AccessibleClass;
 import org.inlambda.kiwi.tuple.Pair;
 import org.inlambda.kiwi.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.lang.reflect.Proxy;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 @ApiStatus.AvailableSince("0.1.0")
 @UtilityClass
@@ -54,6 +58,22 @@ public class Kiwi {
 
     public static <K, V> LazyFunction<K, V> byLazy(Function<K, V> function) {
         return LazyFunction.by(function);
+    }
+
+    private static final Pattern SETTER = Pattern.compile("^set.*");
+
+    @SuppressWarnings("unchecked")
+    public static <T> T lazyProxy(Class<T> tClass, Supplier<T> tSupplier) {
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), new Class[]{tClass}, new LazyProxy<>(byLazy(tSupplier)));
+    }
+
+    public static <T> T immutableBean(T t) {
+        return protectObject(t, SETTER);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T protectObject(T t, Pattern deniedMethodNames) {
+        return (T) Proxy.newProxyInstance(t.getClass().getClassLoader(), new Class[]{t.getClass()}, new DenyProxy<>(t, deniedMethodNames));
     }
 
     public static <K, V> Pair<K, V> pairOf(K k, V v) {
