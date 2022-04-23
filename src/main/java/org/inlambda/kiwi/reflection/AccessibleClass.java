@@ -24,6 +24,7 @@
 
 package org.inlambda.kiwi.reflection;
 
+import lombok.SneakyThrows;
 import org.inlambda.kiwi.Kiwi;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -34,6 +35,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
 @ApiStatus.AvailableSince("0.1.0")
@@ -52,8 +54,11 @@ public class AccessibleClass<T> {
         this.clazz = clazz;
     }
 
+    private static final Map<Class<?>, AccessibleClass<?>> cachedClasses = new WeakHashMap<>();
+
+    @SuppressWarnings("unchecked")
     public static <A> AccessibleClass<A> of(Class<A> clazz) {
-        return new AccessibleClass<>(clazz);
+        return (AccessibleClass<A>) cachedClasses.computeIfAbsent(clazz, AccessibleClass::new);
     }
 
     public AccessibleField<T> virtualField(String fieldName) {
@@ -64,15 +69,15 @@ public class AccessibleClass<T> {
         return fields.computeIfAbsent(fieldName, f -> new AccessibleField<>(clazz, fieldName, true));
     }
 
-    public AccessibleClass<T> fillInFields(){
+    public AccessibleClass<T> fillInFields() {
         for (Field declaredField : clazz.getDeclaredFields()) {
             virtualField(declaredField.getName());
         }
         return this;
     }
 
-    public Collection<AccessibleField<T>> fields(){
-        return fields.values().stream().filter(e->!e.isStatic()).collect(Collectors.toUnmodifiableList());
+    public Collection<AccessibleField<T>> fields() {
+        return fields.values().stream().filter(e -> !e.isStatic()).collect(Collectors.toUnmodifiableList());
     }
 
     @SuppressWarnings("unchecked")
@@ -109,6 +114,26 @@ public class AccessibleClass<T> {
 
     public MethodHandle method(String name, MethodType type) {
         return Kiwi.runAny(() -> TRUSTED_LOOKUP.findVirtual(clazz, name, type)).orElseThrow();
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("unchecked")
+    public String asString(Object t) {
+        if (t.getClass().getMethod("toString").getDeclaringClass() != Object.class) {
+            return t.toString();
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(clazz.getSimpleName()).append(" { ").append('\n');
+        fillInFields();
+        var fieldArray = fields.values().toArray();
+        for (int i = 0; i < Math.min(fields.values().size(), 32); i++) {
+            var field = (AccessibleField<T>) fieldArray[i];
+            if (field.isStatic()) continue;
+            sb.append("  ").append(field.getFieldName()).append(" = ").append(field.get(t)).append('\n');
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     public Class<T> reflect() {

@@ -70,7 +70,12 @@ public class AccessibleField<T> {
             }
         }catch(Throwable excepted){
             // Maybe there isn't a setter method.
-            offset = !isStatic ? Unsafe.objectFieldOffset(field) : Unsafe.staticFieldOffset(field);
+            try {
+                offset = !isStatic ? Unsafe.objectFieldOffset(field) : Unsafe.staticFieldOffset(field);
+            } catch (Throwable t) {
+                // and unsafe is unsupported
+
+            }
         }
         try {
             if (isStatic) {
@@ -78,24 +83,45 @@ public class AccessibleField<T> {
             } else {
                 getter = MethodHandles.lookup().findVirtual(clazz, "get" + uppercaseFirst(fieldName), MethodType.methodType(fieldType));
             }
-        }catch(Throwable excepted){
+        }catch(Throwable excepted) {
             // Maybe there isn't a Getter method.
-            if (offset != 0L) offset = !isStatic ? Unsafe.objectFieldOffset(field) : Unsafe.staticFieldOffset(field);
+            try {
+                if (offset != 0L)
+                    offset = !isStatic ? Unsafe.objectFieldOffset(field) : Unsafe.staticFieldOffset(field);
+            } catch (Throwable t) {
+                // and unsafe is unsupported.
+            }
         }
     }
 
     @SneakyThrows
-    public void set(T t,Object data){
+    public void set(T t,Object data) {
         //Object d = processors.stream().map(e->e.fromDatabase(fieldName,data)).filter(Objects::nonNull).findFirst().orElse(data);
-        if(setter!=null){
-            setter.invokeExact(t,data);
+        if (setter != null) {
+            setter.invokeExact(t, data);
         }
-        assert offset!=0;
-        Unsafe.putObject(t,offset,data);
+        if (offset == 0) {
+            var field = clazz.getDeclaredField(fieldName);
+            if (!field.trySetAccessible()) {
+                throw new IllegalAccessException("Field " + fieldName + " is not accessible.");
+            }
+            field.setAccessible(true);
+            field.set(t, data);
+            return;
+        }
+        Unsafe.putObject(t, offset, data);
     }
     @SneakyThrows
-    public Object get(Object t){
+    public Object get(Object t) {
         //return processors.stream().map(e->e.toDatabase(fieldName,data)).filter(Objects::nonNull).findFirst().orElse(data);
+        if (getter == null && offset == 0) {
+            var field = clazz.getDeclaredField(fieldName);
+            if (!field.trySetAccessible()) {
+                throw new IllegalAccessException("Field " + fieldName + " is not accessible.");
+            }
+            field.setAccessible(true);
+            return field.get(t);
+        }
         return getter == null ? (!isStatic ? Unsafe.getObject(t, offset) : Unsafe.getStatic(clazz, fieldName)) : getter.invokeExact();
     }
 
