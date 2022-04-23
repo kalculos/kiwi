@@ -27,6 +27,9 @@ package org.inlambda.kiwi;
 import lombok.experimental.UtilityClass;
 import org.inlambda.kiwi.lazy.LazyFunction;
 import org.inlambda.kiwi.lazy.LazySupplier;
+import org.inlambda.kiwi.reflection.AccessibleClass;
+import org.inlambda.kiwi.tuple.Pair;
+import org.inlambda.kiwi.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
@@ -36,8 +39,8 @@ import java.util.function.Supplier;
 @ApiStatus.AvailableSince("0.1.0")
 @UtilityClass
 public class Kiwi {
-    public static <T> Optional<T> runAny(AnySupplier<T> supplier){
-        try{
+    public static <T> Optional<T> runAny(AnySupplier<T> supplier) {
+        try {
             var result = supplier.get();
             return Optional.ofNullable(result);
         } catch (Throwable e) {
@@ -45,12 +48,24 @@ public class Kiwi {
         }
     }
 
-    public static <V> LazySupplier<V> byLazy(Supplier<V> supplier){
+    public static <V> LazySupplier<V> byLazy(Supplier<V> supplier) {
         return LazySupplier.by(supplier);
     }
 
-    public static <K,V> LazyFunction<K,V> byLazy(Function<K,V> function){
+    public static <K, V> LazyFunction<K, V> byLazy(Function<K, V> function) {
         return LazyFunction.by(function);
+    }
+
+    public static <K, V> Pair<K, V> pairOf(K k, V v) {
+        return new Pair<>(k, v);
+    }
+
+    public static <A, B, C> Triple<A, B, C> tripleOf(A a, B b, C c) {
+        return new Triple<>(a, b, c);
+    }
+
+    public static <T> AccessibleClass<T> accessClass(Class<T> clazz) {
+        return AccessibleClass.of(clazz);
     }
 
 }

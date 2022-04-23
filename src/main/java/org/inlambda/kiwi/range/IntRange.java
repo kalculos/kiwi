@@ -38,6 +38,12 @@ public final class IntRange {
         return atLeast <= i && i <= atMost;
     }
 
+    public void inRange(int i) {
+        if (!isInRange(i)) {
+            throw new IllegalArgumentException(i + " is not in range [" + atLeast + "," + atMost + "]");
+        }
+    }
+
     public int random() {
         return RandomHelper.number(atLeast, atMost);
     }
