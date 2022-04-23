@@ -26,8 +26,9 @@ package org.inlambda.kiwi.range;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.inlambda.kiwi.RandomHelper;
 import org.jetbrains.annotations.ApiStatus;
+
+import static org.inlambda.kiwi.RandomHelper.number;
 
 @RequiredArgsConstructor
 @ApiStatus.AvailableSince("0.1.0")
@@ -46,9 +47,7 @@ public final class IntRange {
         }
     }
 
-    public int random() {
-        return RandomHelper.number(atLeast, atMost);
-    }
+    private static final IntRange POSITIVE = new IntRange(1, Integer.MAX_VALUE);
 
     public static IntRange rangeOf(int atLeast, int atMost) {
         return new IntRange(atLeast, atMost);
@@ -61,12 +60,18 @@ public final class IntRange {
     public static IntRange rangeAtLeast(int atLeast) {
         return new IntRange(atLeast, Integer.MAX_VALUE);
     }
-    private static final IntRange POSITIVE = new IntRange(1,Integer.MAX_VALUE);
-    public static IntRange rangePositive(){
+
+    public static IntRange rangePositive() {
         return POSITIVE;
     }
-    private static final IntRange NEGATIVE = new IntRange(Integer.MIN_VALUE, -1);
-    public static IntRange rangeNegative(){
+
+    public static IntRange rangeNegative() {
         return NEGATIVE;
+    }
+
+    private static final IntRange NEGATIVE = new IntRange(Integer.MIN_VALUE, -1);
+
+    public int random() {
+        return number(atLeast, atMost);
     }
 }
