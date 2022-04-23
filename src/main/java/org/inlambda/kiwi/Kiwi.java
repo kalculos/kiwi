@@ -27,11 +27,13 @@ package org.inlambda.kiwi;
 import lombok.experimental.UtilityClass;
 import org.inlambda.kiwi.lazy.LazyFunction;
 import org.inlambda.kiwi.lazy.LazySupplier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+@ApiStatus.AvailableSince("0.1.0")
 @UtilityClass
 public class Kiwi {
     public static <T> Optional<T> runAny(AnySupplier<T> supplier){
@@ -42,6 +44,7 @@ public class Kiwi {
             return Optional.empty();
         }
     }
+
     public static <V> LazySupplier<V> byLazy(Supplier<V> supplier){
         return LazySupplier.by(supplier);
     }
