@@ -24,12 +24,14 @@
 
 package org.inlambda.kiwi.range;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.inlambda.kiwi.RandomHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 @RequiredArgsConstructor
 @ApiStatus.AvailableSince("0.1.0")
+@Getter
 public final class IntRange {
     private final int atLeast;
     private final int atMost;
