@@ -113,7 +113,7 @@ public class AccessibleClass<T> {
     }
 
     public MethodHandle method(String name, MethodType type) {
-        return Kiwi.runAny(() -> TRUSTED_LOOKUP.findVirtual(clazz, name, type)).orElseThrow();
+        return Kiwi.fromAny(() -> TRUSTED_LOOKUP.findVirtual(clazz, name, type)).orElseThrow();
     }
 
     @SneakyThrows

@@ -43,13 +43,17 @@ import java.util.regex.Pattern;
 @ApiStatus.AvailableSince("0.1.0")
 @UtilityClass
 public class Kiwi {
-    public static <T> Optional<T> runAny(AnySupplier<T> supplier) {
+    public static <T> Optional<T> fromAny(AnySupplier<T> supplier) {
         try {
             var result = supplier.get();
             return Optional.ofNullable(result);
         } catch (Throwable e) {
             return Optional.empty();
         }
+    }
+
+    public static void runAny(AnyRunnable runnable) {
+        runnable.asRunnable().run();
     }
 
     public static <V> LazySupplier<V> byLazy(Supplier<V> supplier) {
