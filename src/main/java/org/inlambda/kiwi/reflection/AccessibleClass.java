@@ -45,8 +45,8 @@ public class AccessibleClass<T> {
         TRUSTED_LOOKUP = (MethodHandles.Lookup) new AccessibleField<>(MethodHandles.Lookup.class, "IMPL_LOOKUP", true).get(null);
     }
 
-    private Class<T> clazz;
-    private Map<String, AccessibleField<T>> fields = new HashMap<>();
+    private final Class<T> clazz;
+    private final Map<String, AccessibleField<T>> fields = new HashMap<>();
 
     private AccessibleClass(Class<T> clazz) {
         this.clazz = clazz;
@@ -109,6 +109,10 @@ public class AccessibleClass<T> {
 
     public MethodHandle method(String name, MethodType type) {
         return Kiwi.runAny(() -> TRUSTED_LOOKUP.findVirtual(clazz, name, type)).orElseThrow();
+    }
+
+    public Class<T> reflect() {
+        return clazz;
     }
 
 }

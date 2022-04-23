@@ -43,9 +43,9 @@ import java.lang.reflect.Field;
  */
 @ApiStatus.AvailableSince("0.1.0")
 public class AccessibleField<T> {
-    private Class<T> clazz;
+    private final Class<T> clazz;
     @Getter
-    private String fieldName;
+    private final String fieldName;
     private MethodHandle setter;
     private MethodHandle getter;
     private long offset;
@@ -95,9 +95,8 @@ public class AccessibleField<T> {
     }
     @SneakyThrows
     public Object get(Object t){
-        Object data = getter == null ? (!isStatic ? Unsafe.getObject(t, offset) : Unsafe.getStatic(clazz, fieldName)) : getter.invokeExact();
         //return processors.stream().map(e->e.toDatabase(fieldName,data)).filter(Objects::nonNull).findFirst().orElse(data);
-        return data;
+        return getter == null ? (!isStatic ? Unsafe.getObject(t, offset) : Unsafe.getStatic(clazz, fieldName)) : getter.invokeExact();
     }
 
     @SneakyThrows
