@@ -35,7 +35,6 @@ import org.inlambda.kiwi.tuple.Triple;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Proxy;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -43,17 +42,22 @@ import java.util.regex.Pattern;
 @ApiStatus.AvailableSince("0.1.0")
 @UtilityClass
 public class Kiwi {
-    public static <T> Optional<T> fromAny(AnySupplier<T> supplier) {
+    public static <T> Result<T, ? extends Throwable> fromAny(AnySupplier<T> supplier) {
         try {
             var result = supplier.get();
-            return Optional.ofNullable(result);
+            return Result.ok(result);
         } catch (Throwable e) {
-            return Optional.empty();
+            return Result.err(e);
         }
     }
 
-    public static void runAny(AnyRunnable runnable) {
-        runnable.asRunnable().run();
+    public static Result<?, ? extends Throwable> runAny(AnyRunnable runnable) {
+        try {
+            runnable.run();
+            return Result.ok();
+        } catch (Throwable e) {
+            return Result.err(e);
+        }
     }
 
     public static <V> LazySupplier<V> byLazy(Supplier<V> supplier) {
