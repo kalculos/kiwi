@@ -25,11 +25,11 @@
 package org.inlambda.kiwi;
 
 import lombok.experimental.UtilityClass;
+import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
@@ -48,8 +48,8 @@ public final class RandomHelper {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> Optional<T> pick(Collection<T> t) {
-        return (Optional<T>) Optional.ofNullable(t.toArray()[ThreadLocalRandom.current().nextInt(t.size())]);
+    public static <T> Option<T> pick(Collection<T> t) {
+        return (Option<T>) Option.of(t.toArray()[ThreadLocalRandom.current().nextInt(t.size())]);
     }
 
     public static int number(int bound) {
