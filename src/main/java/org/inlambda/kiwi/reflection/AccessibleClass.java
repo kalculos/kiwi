@@ -76,6 +76,10 @@ public class AccessibleClass<T> {
         return this;
     }
 
+    public Map<String, Object> toMap() {
+        return fields.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(null)));
+    }
+
     public Collection<AccessibleField<T>> fields() {
         return fields.values().stream().filter(e -> !e.isStatic()).collect(Collectors.toUnmodifiableList());
     }
