@@ -26,7 +26,6 @@ package org.inlambda.kiwi.option;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import org.inlambda.kiwi.Option;
 import org.inlambda.kiwi.Result;
 import org.inlambda.kiwi.SingleIterator;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +41,6 @@ import java.util.stream.Stream;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class Some<T> implements Option<T> {
-    static final Some<?> NONE = new Some<>(null);
     private final T value;
 
     @Override
@@ -155,6 +153,11 @@ public class Some<T> implements Option<T> {
     @Override
     public Optional<T> asOptional() {
         return Optional.of(value);
+    }
+
+    @Override
+    public Present<T> toPresent() {
+        return new Present<>(value);
     }
 
     @NotNull

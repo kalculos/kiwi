@@ -24,7 +24,6 @@
 
 package org.inlambda.kiwi.option;
 
-import org.inlambda.kiwi.Option;
 import org.inlambda.kiwi.Result;
 import org.jetbrains.annotations.NotNull;
 
@@ -132,6 +131,12 @@ public final class None<T> implements Option<T> {
     @Override
     public Optional<T> asOptional() {
         return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Present<T> toPresent() {
+        return (Present<T>) Present.NULL;
     }
 
     @NotNull

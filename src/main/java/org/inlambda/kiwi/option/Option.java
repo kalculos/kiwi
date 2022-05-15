@@ -22,9 +22,9 @@
  * SOFTWARE.
  */
 
-package org.inlambda.kiwi;
+package org.inlambda.kiwi.option;
 
-import org.inlambda.kiwi.option.None;
+import org.inlambda.kiwi.Result;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -37,12 +37,13 @@ import java.util.stream.Stream;
 
 /**
  * An immutable data structure that represents a single value or a missing value.
- * Can be serializable.
+ * Can be serializable,but you'll have to use {@link Present}
  * If any value present: {@link org.inlambda.kiwi.option.Some<T>}
  * If no values present: {@link org.inlambda.kiwi.option.None<T>}
  *
  * @param <T> type of value
  */
+
 public interface Option<T> extends Iterable<T>, Serializable {
 
     static <T> Option<T> of(T value) {
@@ -95,4 +96,6 @@ public interface Option<T> extends Iterable<T>, Serializable {
     Result<T, ?> asResult();
 
     Optional<T> asOptional();
+
+    Present<T> toPresent();
 }

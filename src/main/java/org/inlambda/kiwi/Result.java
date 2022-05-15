@@ -28,6 +28,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
+import org.inlambda.kiwi.option.Option;
 import org.inlambda.kiwi.option.Some;
 import org.jetbrains.annotations.NotNull;
 
