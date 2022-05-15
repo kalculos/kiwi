@@ -38,7 +38,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Like {@link Option}, but with error handling and more semantic.
+ * Like {@link Some}, but with error handling and more semantic.
  *
  * @param <T>
  * @param <E>
@@ -50,32 +50,28 @@ public class Result<T, E> {
     private final T result;
     private final E err;
 
-    @SuppressWarnings("unchecked")
-    public static <T, E> Result<T, E> fromOption(Some<T> option) {
-        return (Result<T, E>) option.asResult();
+    public static <T> Result<T, ?> fromOption(Some<T> option) {
+        return option.asResult();
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T, E> Result<T, E> fromOptional(Optional<T> optional) {
-        return optional.<Result<T, E>>map(Result::ok).orElseGet(Result::err);
+    public static <T> Result<T, ?> fromOptional(Optional<T> optional) {
+        return optional.isPresent() ? ok(optional.get()) : err();
     }
 
     public static <T, E> @NotNull Result<T, E> ok(@NotNull T T) {
         return new Result<>(T, null);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T, E> @NotNull Result<T, E> ok() {
-        return (Result<T, E>) new Result<>(Unit.UNIT, null);
+    public static <E> @NotNull Result<Unit, E> ok() {
+        return new Result<>(Unit.UNIT, null);
     }
 
     public static <T, E> @NotNull Result<T, E> err(@NotNull E err) {
         return new Result<>(null, err);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T, E> @NotNull Result<T, E> err() {
-        return (Result<T, E>) new Result<>(null, Unit.UNIT);
+    public static <T> @NotNull Result<T, Unit> err() {
+        return new Result<>(null, Unit.UNIT);
     }
 
     public T get() throws Throwable {
