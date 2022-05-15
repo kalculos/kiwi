@@ -29,7 +29,6 @@ import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.inlambda.kiwi.option.Option;
-import org.inlambda.kiwi.option.Some;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -49,10 +48,6 @@ import java.util.function.Supplier;
 public class Result<T, E> {
     private final T result;
     private final E err;
-
-    public static <T> Result<T, ?> fromOption(Some<T> option) {
-        return option.asResult();
-    }
 
     public static <T> Result<T, ?> fromOptional(Optional<T> optional) {
         return optional.isPresent() ? ok(optional.get()) : err();
