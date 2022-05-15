@@ -92,8 +92,4 @@ public class Kiwi {
         return AccessibleClass.of(clazz);
     }
 
-    public static String toString(Object o) {
-        return accessClass(o.getClass()).asString(o);
-    }
-
 }

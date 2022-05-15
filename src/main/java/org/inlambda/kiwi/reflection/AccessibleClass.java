@@ -118,8 +118,8 @@ public class AccessibleClass<T> {
 
     @SneakyThrows
     @SuppressWarnings("unchecked")
-    public String asString(Object t) {
-        if (t.getClass().getMethod("toString").getDeclaringClass() != Object.class) {
+    public String asString(T t, boolean invokeItsToString) {
+        if (invokeItsToString && t.getClass().getMethod("toString").getDeclaringClass() != Object.class) {
             return t.toString();
         }
 
