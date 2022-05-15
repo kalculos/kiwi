@@ -76,8 +76,8 @@ public class AccessibleClass<T> {
         return this;
     }
 
-    public Map<String, Object> toMap() {
-        return fields.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(null)));
+    public Map<String, Object> toMap(T t) {
+        return fields.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(t)));
     }
 
     public Collection<AccessibleField<T>> fields() {
