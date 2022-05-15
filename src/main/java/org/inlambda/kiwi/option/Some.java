@@ -46,7 +46,13 @@ public class Some<T> implements Option<T> {
     @Override
     @NotNull
     public Option<T> If(Predicate<T> condition, Consumer<T> action) {
-        if (condition.test(value)) action.accept(value);
+        if (condition.test(value)) {
+            try {
+                action.accept(value);
+            } catch (RuntimeException exception) {
+                throw exception;
+            }
+        }
         return this;
     }
 
@@ -78,7 +84,13 @@ public class Some<T> implements Option<T> {
     @NotNull
     public <R> Option<T> Case(Function<T, R> condition, Consumer<R> action) {
         var val = condition.apply(value);
-        if (val != null) action.accept(val);
+        if (val != null) {
+            try {
+                action.accept(val);
+            } catch (RuntimeException exception) {
+                throw exception;
+            }
+        }
         return this;
     }
 

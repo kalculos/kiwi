@@ -40,6 +40,8 @@ import java.util.stream.Stream;
  * Can be serializable,but you'll have to use {@link Present} if you dont want to make a serializer
  * If any value present: {@link org.inlambda.kiwi.option.Some<T>}
  * If no values present: {@link org.inlambda.kiwi.option.None<T>}
+ * <p>
+ * Method with Uppder-Camel-Case names always re-throw exception from your consumer. You can use this feature easily throwing exceptions outside.
  *
  * @param <T> type of value
  */
