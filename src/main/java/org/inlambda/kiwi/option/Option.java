@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 
 /**
  * An immutable data structure that represents a single value or a missing value.
- * Can be serializable,but you'll have to use {@link Present}
+ * Can be serializable,but you'll have to use {@link Present} if you dont want to make a serializer
  * If any value present: {@link org.inlambda.kiwi.option.Some<T>}
  * If no values present: {@link org.inlambda.kiwi.option.None<T>}
  *

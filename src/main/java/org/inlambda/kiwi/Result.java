@@ -38,7 +38,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Like {@link Some}, but with error handling and more semantic.
+ * Like {@link Option}, but with error handling and more semantic.
  *
  * @param <T>
  * @param <E>
