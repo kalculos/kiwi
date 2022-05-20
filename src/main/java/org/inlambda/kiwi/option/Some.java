@@ -74,10 +74,8 @@ public class Some<T> implements Option<T> {
     public <R> Option<T> IfCast(Class<R> type, Consumer<Option<R>> consumer) {
         if (type.isInstance(value)) {
             consumer.accept(Option.of((R) value));
-            return this;
-        } else {
-            return this;
         }
+        return this;
     }
 
     @Override

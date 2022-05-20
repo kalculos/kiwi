@@ -80,7 +80,7 @@ public class Result<T, E> {
     }
 
     public T orElseThrow(Supplier<RuntimeException> supplier) {
-        if (err == null) {
+        if (err != null) {
             throw supplier.get();
         }
         return result;
