@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
@@ -107,6 +108,30 @@ public class Result<T, E> {
             consumer.accept(result);
         }
         return this;
+    }
+
+    public Result<T, E> except(Predicate<T> predicate) {
+        if (isFailed()) return this;
+        if (predicate.test(result)) {
+            return this;
+        } else {
+            return Result.err(err);
+        }
+    }
+
+    public <AT> Result<AT, ?> and(Result<AT, ?> anotherResult) {
+        if (isFailed() || anotherResult.isFailed()) {
+            return Result.err();
+        }
+        return anotherResult;
+    }
+
+    public <AR> Result<AR, ?> then(Function<T, AR> anotherOperation) {
+        if (err == null) {
+            return Kiwi.fromAny(() -> anotherOperation.apply(result));
+        } else {
+            return Result.err(err);
+        }
     }
 
     public Result<T, E> fail(Consumer<E> consumer) {

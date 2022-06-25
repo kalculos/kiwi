@@ -32,4 +32,5 @@ Dive into [Kiwi](./src/main/java/org/inlambda/kiwi/Kiwi.java) to see some featur
         var positiveRange=IntRange.rangePositive();
         positiveRange.isInRange(11); // true
         positiveRange.random(); // get a random number in this range.
+        todo(); // throw exception
 ```
