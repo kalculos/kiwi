@@ -1,3 +1,5 @@
 rootProject.name = 'kiwi'
 include 'collection'
+include 'magic'
+include 'magic-test'
 
