@@ -1,2 +1,3 @@
 rootProject.name = 'kiwi'
+include 'collection'
 

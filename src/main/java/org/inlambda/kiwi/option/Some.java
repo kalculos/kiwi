@@ -24,7 +24,6 @@
 
 package org.inlambda.kiwi.option;
 
-import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.inlambda.kiwi.Result;
 import org.inlambda.kiwi.SingleIterator;
@@ -39,7 +38,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-@RequiredArgsConstructor(access = AccessLevel.PRIVATE)
+@RequiredArgsConstructor()
 public class Some<T> implements Option<T> {
     private final T value;
 

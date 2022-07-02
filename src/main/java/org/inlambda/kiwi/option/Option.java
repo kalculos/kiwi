@@ -49,12 +49,17 @@ import java.util.stream.Stream;
 public interface Option<T> extends Iterable<T>, Serializable {
 
     static <T> Option<T> of(T value) {
-        return value == null ? none() : of(value);
+        return value == null ? none() : some(value);
     }
 
     @SuppressWarnings("unchecked")
     static <T> Option<T> none() {
         return (Option<T>) None.NONE;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> Option<T> some(T value) {
+        return new Some<>(value);
     }
 
     @NotNull Option<T> If(Predicate<T> condition, Consumer<T> action);
