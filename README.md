@@ -1,6 +1,6 @@
 # Kiwi
 
-简单好用强大的 Java 工具。
+简单好用强大的 Java 工具，请配合静态导入食用。
 
 Dive into [Kiwi](./src/main/java/org/inlambda/kiwi/Kiwi.java) to see some features.
 
@@ -54,7 +54,7 @@ Option.of(somethingNullable)
 
 ## Collection
 
-Kiwi 提供了~~你四处寻觅的~~`Pair<A,B>` 和 `Triple<A,B,C>`
+Kiwi 提供了~~你四处寻觅的~~` Pair<A,B>` 和 `Triple<A,B,C>`
 
 ```java
 Kiwi.pairOf(...)
