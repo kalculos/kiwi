@@ -104,7 +104,24 @@ public final class MyResponse {
         new MyResponse(true,"Yes! \"Hello, world!\"").toString().equals(excepted);
 ```
 
-Kiwi 支持你把事情推后再做。
+也可以帮你检查空参数
+
+```java
+
+// source
+@NoNullExcepted
+public Connection createConnection(String jdbcUrl,@Nullable Context context){
+        //....
+        }
+
+// de-compiled class:
+public Connection createConnection(String jdbcUrl,@Nullable Context context){
+        Objects.requireNonNull(jdbcUrl,"jdbcUrl cannot be null")
+        //....
+        }
+```
+
+也可以把事情推后再做。
 
 ```java
 public XXService importantMethod(){

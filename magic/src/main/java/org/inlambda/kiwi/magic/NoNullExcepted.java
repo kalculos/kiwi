@@ -22,35 +22,15 @@
  * SOFTWARE.
  */
 
-package org.inlambda;
+package org.inlambda.kiwi.magic;
 
-import org.inlambda.kiwi.magic.Jsonized;
-import org.inlambda.kiwi.magic.NoNullExcepted;
-import org.jetbrains.annotations.Nullable;
+import java.lang.annotation.*;
 
-@Jsonized
-public class TestJsonized {
-    private String data = "nono";
-    private int a;
-
-    public TestJsonized(String data, int a) {
-        this.data = data;
-        this.a = a;
-    }
-
-    public TestJsonized() {
-
-    }
-
-    @NoNullExcepted
-    public static void main(String[] args) {
-        System.out.println(new TestJsonized("a", 1));
-        System.out.println(new TestJsonized("b", 2));
-        System.out.println(new TestJsonized());
-    }
-
-    @NoNullExcepted
-    public void aa(String notNul, @Nullable String nullable) {
-
-    }
+/**
+ * Adds requireNonNull for each parameter, except for @Nullable annotated.
+ */
+@Retention(RetentionPolicy.SOURCE)
+@Documented
+@Target({ElementType.METHOD})
+public @interface NoNullExcepted {
 }

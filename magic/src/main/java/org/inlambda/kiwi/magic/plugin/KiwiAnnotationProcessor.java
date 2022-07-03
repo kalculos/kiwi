@@ -29,7 +29,10 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Names;
+import org.inlambda.kiwi.magic.Jsonized;
+import org.inlambda.kiwi.magic.NoNullExcepted;
 import org.inlambda.kiwi.magic.plugin.gens.GenJsonToString;
+import org.inlambda.kiwi.magic.plugin.gens.GenNoNull;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
@@ -37,7 +40,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
-@SupportedAnnotationTypes("org.inlambda.kiwi.magic.Jsonized")
+@SupportedAnnotationTypes("*")
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 public class KiwiAnnotationProcessor extends AbstractProcessor {
     private Context context;
@@ -65,11 +68,16 @@ public class KiwiAnnotationProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
-            if (annotation.getQualifiedName().contentEquals("org.inlambda.kiwi.magic.Jsonized")) {
+            if (annotation.getQualifiedName().contentEquals(Jsonized.class.getName())) {
                 for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
                     var jtree = (JCTree.JCClassDecl) trees.getTree(element);
                     var method = GenJsonToString.genMethod(maker, names, jtree);
                     jtree.defs = jtree.defs.append(method);
+                }
+            } else if (annotation.getQualifiedName().contentEquals(NoNullExcepted.class.getName())) {
+                for (Element element : roundEnv.getElementsAnnotatedWith(annotation)) {
+                    var jmeth = (JCTree.JCMethodDecl) trees.getTree(element);
+                    GenNoNull.genNonNulls(maker, names, jmeth);
                 }
             }
         }

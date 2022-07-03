@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.inlambda.kiwi.magic.plugin;
+package org.inlambda.kiwi.magic.plugin.jc;
 
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
@@ -47,5 +47,6 @@ public class KiwiTaskListener implements TaskListener {
             return;
         }
         e.getCompilationUnit().accept(new JsonizedTreeScanner(), context);
+        e.getCompilationUnit().accept(new NoNullTreeScanner(), context);
     }
 }

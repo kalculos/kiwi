@@ -27,8 +27,11 @@ package org.inlambda.kiwi.magic.plugin;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.Plugin;
 import com.sun.tools.javac.api.BasicJavacTask;
+import org.inlambda.kiwi.magic.plugin.jc.KiwiTaskListener;
 
 public class KiwiJavacPlugin implements Plugin {
+    public static volatile boolean enabled;
+
     @Override
     public String getName() {
         return "Kiwi";
@@ -36,7 +39,8 @@ public class KiwiJavacPlugin implements Plugin {
 
     @Override
     public void init(JavacTask task, String... args) {
-        System.out.println("Kiwi is injected!");
+        enabled = true;
+        System.out.println("Kiwi is injected as Javac Plugin");
         task.addTaskListener(new KiwiTaskListener(((BasicJavacTask) task).getContext(), false));
     }
 }

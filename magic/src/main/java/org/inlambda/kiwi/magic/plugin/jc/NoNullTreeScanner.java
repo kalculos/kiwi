@@ -22,35 +22,20 @@
  * SOFTWARE.
  */
 
-package org.inlambda;
+package org.inlambda.kiwi.magic.plugin.jc;
 
-import org.inlambda.kiwi.magic.Jsonized;
-import org.inlambda.kiwi.magic.NoNullExcepted;
-import org.jetbrains.annotations.Nullable;
+import com.sun.source.tree.MethodTree;
+import com.sun.source.util.TreeScanner;
+import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.TreeMaker;
+import com.sun.tools.javac.util.Context;
+import com.sun.tools.javac.util.Names;
+import org.inlambda.kiwi.magic.plugin.gens.GenNoNull;
 
-@Jsonized
-public class TestJsonized {
-    private String data = "nono";
-    private int a;
-
-    public TestJsonized(String data, int a) {
-        this.data = data;
-        this.a = a;
-    }
-
-    public TestJsonized() {
-
-    }
-
-    @NoNullExcepted
-    public static void main(String[] args) {
-        System.out.println(new TestJsonized("a", 1));
-        System.out.println(new TestJsonized("b", 2));
-        System.out.println(new TestJsonized());
-    }
-
-    @NoNullExcepted
-    public void aa(String notNul, @Nullable String nullable) {
-
+public class NoNullTreeScanner extends TreeScanner<Void, Context> {
+    @Override
+    public Void visitMethod(MethodTree node, Context context) {
+        GenNoNull.genNonNulls(TreeMaker.instance(context), Names.instance(context), (JCTree.JCMethodDecl) node);
+        return null;
     }
 }

@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package org.inlambda.kiwi.magic.plugin;
+package org.inlambda.kiwi.magic.plugin.jc;
 
 import com.sun.source.tree.ClassTree;
 import com.sun.source.util.TreeScanner;
@@ -36,9 +36,7 @@ public class JsonizedTreeScanner extends TreeScanner<Void, Context> {
 
     @Override
     public Void visitClass(ClassTree node, Context ctx) {
-        System.out.println(node);
         try {
-
             var maker = TreeMaker.instance(ctx);
             var name = Names.instance(ctx);
             var claz = (JCTree.JCClassDecl) node;
