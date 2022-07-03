@@ -37,6 +37,6 @@ public class KiwiJavacPlugin implements Plugin {
     @Override
     public void init(JavacTask task, String... args) {
         System.out.println("Kiwi is injected!");
-        task.addTaskListener(new KiwiTaskListener(((BasicJavacTask) task).getContext()));
+        task.addTaskListener(new KiwiTaskListener(((BasicJavacTask) task).getContext(), false));
     }
 }

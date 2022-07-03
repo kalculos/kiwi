@@ -15,7 +15,7 @@ dependencies {
     compileOnly(project(":magic"))
     annotationProcessor(project(":magic"))
 }
-compileJava { options.compilerArgs << '-Xplugin:Kiwi' }
+//compileJava { options.compilerArgs << '-Xplugin:Kiwi' }
 test {
     useJUnitPlatform()
 }

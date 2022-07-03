@@ -30,14 +30,15 @@ import com.sun.tools.javac.util.Context;
 
 public class KiwiTaskListener implements TaskListener {
     private final Context context;
+    private final boolean annotationMode;
 
-    public KiwiTaskListener(Context context) {
+    public KiwiTaskListener(Context context, boolean annotationMode) {
         this.context = context;
+        this.annotationMode = annotationMode;
     }
 
     @Override
     public void started(TaskEvent e) {
-
     }
 
     @Override

@@ -19,6 +19,7 @@ compileJava {
             << "--add-exports=jdk.compiler/com.sun.tools.javac.code=kiwi.magic.main"
             << "--add-exports=jdk.compiler/com.sun.tools.javac.util=kiwi.magic.main"
             << "--add-exports=jdk.compiler/com.sun.tools.javac.api=kiwi.magic.main"
+            << "--add-exports=jdk.compiler/com.sun.tools.javac.processing=kiwi.magic.main"
 }
 test {
     useJUnitPlatform()

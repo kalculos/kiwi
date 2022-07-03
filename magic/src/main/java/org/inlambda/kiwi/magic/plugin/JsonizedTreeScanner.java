@@ -25,22 +25,18 @@
 package org.inlambda.kiwi.magic.plugin;
 
 import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.util.TreeScanner;
-import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeMaker;
 import com.sun.tools.javac.util.Context;
-import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.Name;
 import com.sun.tools.javac.util.Names;
-
-import java.util.stream.Collectors;
+import org.inlambda.kiwi.magic.plugin.gens.GenJsonToString;
 
 public class JsonizedTreeScanner extends TreeScanner<Void, Context> {
 
     @Override
     public Void visitClass(ClassTree node, Context ctx) {
+        System.out.println(node);
         try {
 
             var maker = TreeMaker.instance(ctx);
@@ -48,17 +44,8 @@ public class JsonizedTreeScanner extends TreeScanner<Void, Context> {
             var claz = (JCTree.JCClassDecl) node;
             if (node.getModifiers().getAnnotations().stream().anyMatch(e -> e.getAnnotationType().toString().equals("Jsonized"))) {
                 System.out.println("Jsonized class found: " + node.getSimpleName());
-                var method = maker.at(claz.pos).MethodDef(
-                        maker.Modifiers(Flags.PUBLIC | Flags.FINAL),
-                        name.fromString("toString"),
-                        maker.Ident(name.fromString("String")),
-                        List.nil(),
-                        List.nil(),
-                        List.nil(),
-                        maker.Block(0, makeReturnJsonExpress(maker, name, claz)), null
-                );
                 //System.out.println(method);
-                claz.defs = claz.getMembers().append(method);
+                claz.defs = claz.getMembers().append(GenJsonToString.genMethod(maker, name, claz));
                 ///  System.out.println(claz);
                 super.visitClass(node, ctx);
             }
@@ -70,65 +57,6 @@ public class JsonizedTreeScanner extends TreeScanner<Void, Context> {
         }
         super.visitClass(node, ctx);
         return null;
-    }
-
-    private List<JCTree.JCStatement> makeReturnJsonExpress(TreeMaker maker, Names name, JCTree.JCClassDecl claz) {
-        var json = claz.getMembers().stream().filter(e -> e.getKind() == Tree.Kind.VARIABLE)
-                .filter(e -> e instanceof JCTree.JCVariableDecl).map(e -> (JCTree.JCVariableDecl) e).collect(Collectors.toMap(e -> e.getName(), e -> e.getType()));
-        var list = json.entrySet().stream()
-                .map(e -> maker.Binary(JCTree.Tag.PLUS, maker.Literal("\"" + e.getKey() + "\":"), processValue(e.getValue(), e.getKey(), maker, name)))
-                .reduce((e1, e2) -> maker.Binary(JCTree.Tag.PLUS, e1, maker.Binary(JCTree.Tag.PLUS, maker.Literal(","), e2)))
-                .orElseThrow();
-        list = maker.Binary(JCTree.Tag.PLUS, maker.Literal("{"), list);
-        list = maker.Binary(JCTree.Tag.PLUS, list, maker.Literal("}"));
-        return List.of(maker.Return(
-                list
-        ));
-    }
-
-    private JCTree.JCExpression processValue(JCTree value, Name name, TreeMaker maker, Names names) {
-        var typeName = value.toString();
-        System.out.println(typeName);
-        switch (typeName) {
-            case "List<String>":
-            case "List<CharSequence>":
-            case "Collection<CharSequence>":
-            case "Collection<String>":
-            case "Set<CharSequence>":
-            case "Set<String>":
-            case "Queue<CharSequence>":
-            case "Queue<String>":
-            case "String":
-            case "CharSequence":
-            case "StringBuilder":
-            case "StringBuffer":
-                var toS = maker.Exec(maker.Apply(
-                        List.nil(),
-                        maker.Select(
-                                maker.Ident(name),
-                                names.fromString("toString")
-                        ),
-                        List.nil()
-                ));
-                var replaced = maker.Exec(
-                        maker.Apply(
-                                List.nil(),
-                                maker.Select(
-                                        toS.expr,
-                                        names.fromString("replaceAll")
-                                ),
-                                List.of(
-                                        maker.Literal("\\\""),
-                                        maker.Literal("\\\\\"")
-                                )
-                        )
-                );
-                System.out.println(replaced.expr);
-                return maker.Binary(JCTree.Tag.PLUS, maker.Literal("\""),
-                        maker.Binary(JCTree.Tag.PLUS, replaced.expr, maker.Literal("\"")));
-            default:
-                return maker.Ident(name);
-        }
     }
 
 }
