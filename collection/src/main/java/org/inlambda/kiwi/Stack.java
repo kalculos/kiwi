@@ -24,6 +24,9 @@
 
 package org.inlambda.kiwi;
 
+import org.inlambda.kiwi.collection.stack.ArrayOpenStack;
+import org.inlambda.kiwi.collection.stack.LinkedOpenStack;
+import org.inlambda.kiwi.collection.stack.SynchronizedStack;
 import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +41,21 @@ import java.util.stream.Stream;
  * @param <E> element
  */
 @ApiStatus.AvailableSince("0.2.4")
-public interface Stack<E> {
+public interface Stack<E> extends Iterable<E> {
+
+    static <E> Stack<E> ofSynced(Stack<E> stack) {
+        if (stack instanceof SynchronizedStack) return stack;
+        return new SynchronizedStack<>(stack);
+    }
+
+    static <E> Stack<E> newArrayStack() {
+        return new ArrayOpenStack<>();
+    }
+
+    static <E> Stack<E> newLinkedStack() {
+        return new LinkedOpenStack<>();
+    }
+
     /**
      * Pop the top element
      *
@@ -117,7 +134,7 @@ public interface Stack<E> {
         return Stream.of(toArray());
     }
 
-    default void forEach(Consumer<E> consumer) {
+    default void forEach(Consumer<? super E> consumer) {
         stream().forEach(consumer);
     }
 }

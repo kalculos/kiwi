@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'org.inlambda.kiwi'
-version '0.0.1'
+version parent.version
 
 repositories {
     mavenCentral()
@@ -14,7 +14,27 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     compileOnly(parent)
 }
+if (System.getProperty("user.name").equals("icybear")) {
+    publishing {
+        repositories {
+            maven {
+                name = "bukkit.rip"
+                url = uri("https://mvn.bukkit.rip/releases")
+                credentials {
+                    username = bkrip_user
+                    password = bkrip_token
+                }
+            }
+        }
+        publications {
+            ilrepo(MavenPublication) {
+                artifactId 'collection'
+                from components.java
 
+            }
+        }
+    }
+}
 test {
     useJUnitPlatform()
 }

@@ -3,7 +3,7 @@ plugins {
 }
 
 group 'org.inlambda'
-version '0.0.1'
+version parent.version
 
 repositories {
     mavenCentral()

@@ -1,9 +1,10 @@
 plugins {
     id 'java'
 }
+apply plugin: 'maven-publish'
 
-group 'org.inlambda'
-version '0.0.1'
+group 'org.inlambda.kiwi'
+version '0.3.0'
 
 repositories {
     mavenCentral()
@@ -13,8 +14,29 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
+if (System.getProperty("user.name").equals("icybear")) {
+    publishing {
+        repositories {
+            maven {
+                name = "bukkit.rip"
+                url = uri("https://mvn.bukkit.rip/releases")
+                credentials {
+                    username = bkrip_user
+                    password = bkrip_token
+                }
+            }
+        }
+        publications {
+            ilrepo(MavenPublication) {
+                artifactId this.project.name
+                from components.java
 
+            }
+        }
+    }
+}
 allprojects {
+    apply plugin: 'maven-publish'
     afterEvaluate {
         dependencies {
             compileOnly 'org.jetbrains:annotations:23.0.0'

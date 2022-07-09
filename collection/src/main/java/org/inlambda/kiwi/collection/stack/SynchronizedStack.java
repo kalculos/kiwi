@@ -24,76 +24,61 @@
 
 package org.inlambda.kiwi.collection.stack;
 
-import org.inlambda.kiwi.collection.iterator.ArrayIterator;
+import lombok.RequiredArgsConstructor;
+import org.inlambda.kiwi.Stack;
 import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.inlambda.kiwi.range.IntRange.rangePositive;
+@RequiredArgsConstructor
+public class SynchronizedStack<E> implements Stack<E> {
+    private final Stack<E> origin;
 
-public class ArrayFixedStack<E> implements ArrayStack<E> {
-    private final E[] array;
-    private int len;
-
-    public ArrayFixedStack(int length) {
-        rangePositive().inRange(length);
-        this.array = (E[]) new Object[length];
+    @Override
+    public synchronized E pop() {
+        return origin.pop();
     }
 
     @Override
-    public E pop() {
-        if (isEmpty()) {
-            throw new ArrayIndexOutOfBoundsException("Stack is empty");
-
-        }
-        var e = array[len - 1];
-        array[--len] = null;
-        return e;
+    public synchronized void push(E element) {
+        origin.push(element);
     }
 
     @Override
-    public void push(E element) {
-        if (len == array.length) {
-            throw new ArrayIndexOutOfBoundsException("Stack is full");
-        }
-        array[++len] = element;
+    public @NotNull
+    synchronized Option<E> peek() {
+        return origin.peek();
     }
 
     @Override
-    public @NotNull Option<E> peek() {
-        return Option.of(array[len - 1]);
+    public synchronized boolean isEmpty() {
+        return origin.isEmpty();
     }
 
     @Override
-    public boolean isEmpty() {
-        return len == 0;
+    public synchronized E get(int index) {
+        return origin.get(index);
     }
 
     @Override
-    public E get(int index) {
-        return array[index];
+    public synchronized int indexOf(E e) {
+        return origin.indexOf(e);
     }
 
     @Override
-    public int size() {
-        return len;
+    public synchronized int size() {
+        return origin.size();
     }
 
     @Override
-    public E[] toArray() {
-        return Arrays.copyOf(array, len);
-    }
-
-    @Override
-    public boolean hasSlot() {
-        return len != array.length;
+    public synchronized E[] toArray() {
+        return origin.toArray();
     }
 
     @NotNull
     @Override
-    public Iterator<E> iterator() {
-        return new ArrayIterator<>(array);
+    public synchronized Iterator<E> iterator() {
+        return origin.iterator();
     }
 }

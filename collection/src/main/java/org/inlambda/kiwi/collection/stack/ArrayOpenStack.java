@@ -24,11 +24,13 @@
 
 package org.inlambda.kiwi.collection.stack;
 
+import org.inlambda.kiwi.collection.iterator.ArrayIterator;
 import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Iterator;
 
 import static org.inlambda.kiwi.range.IntRange.rangePositive;
 
@@ -109,5 +111,11 @@ public final class ArrayOpenStack<E> implements ArrayStack<E> {
     @Override
     public boolean hasSlot() {
         return true;
+    }
+
+    @NotNull
+    @Override
+    public Iterator<E> iterator() {
+        return new ArrayIterator<>(elements);
     }
 }

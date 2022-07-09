@@ -29,6 +29,7 @@ import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -97,8 +98,14 @@ public final class LinkedOpenStack<E> implements Stack<E> {
         return list.stream();
     }
 
+    @NotNull
     @Override
-    public void forEach(Consumer<E> consumer) {
+    public Iterator<E> iterator() {
+        return list.iterator();
+    }
+
+    @Override
+    public void forEach(Consumer<? super E> consumer) {
         list.forEach(consumer);
     }
 }
