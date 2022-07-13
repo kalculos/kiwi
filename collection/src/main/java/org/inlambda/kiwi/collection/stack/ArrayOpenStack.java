@@ -118,4 +118,9 @@ public final class ArrayOpenStack<E> implements ArrayStack<E> {
     public Iterator<E> iterator() {
         return new ArrayIterator<>(elements);
     }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(elements);
+    }
 }

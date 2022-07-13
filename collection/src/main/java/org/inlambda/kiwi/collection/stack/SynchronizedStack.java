@@ -81,4 +81,9 @@ public class SynchronizedStack<E> implements Stack<E> {
     public synchronized Iterator<E> iterator() {
         return origin.iterator();
     }
+
+    @Override
+    public String toString() {
+        return origin.toString();
+    }
 }

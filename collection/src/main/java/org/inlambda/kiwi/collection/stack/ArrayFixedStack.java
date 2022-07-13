@@ -96,4 +96,9 @@ public class ArrayFixedStack<E> implements ArrayStack<E> {
     public Iterator<E> iterator() {
         return new ArrayIterator<>(array);
     }
+
+    @Override
+    public String toString() {
+        return Arrays.toString(array);
+    }
 }

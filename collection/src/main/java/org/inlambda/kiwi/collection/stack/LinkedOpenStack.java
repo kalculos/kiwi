@@ -105,6 +105,11 @@ public final class LinkedOpenStack<E> implements Stack<E> {
     }
 
     @Override
+    public String toString() {
+        return list.toString();
+    }
+
+    @Override
     public void forEach(Consumer<? super E> consumer) {
         list.forEach(consumer);
     }
