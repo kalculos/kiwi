@@ -25,6 +25,7 @@
 package org.inlambda.kiwi.retry;
 
 import org.inlambda.kiwi.Result;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -32,6 +33,7 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
+@ApiStatus.AvailableSince("0.3.1")
 public class Retries<I, O, E extends Throwable> {
     private final Function<I, Result<O, ? extends E>> run;
     private final Predicate<O> until;
