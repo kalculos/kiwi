@@ -30,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import org.inlambda.kiwi.option.Option;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -164,4 +165,8 @@ public class Result<T, E> {
         return Option.of(result);
     }
 
+    @Nullable
+    public E getErr() {
+        return err;
+    }
 }
