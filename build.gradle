@@ -3,8 +3,8 @@ plugins {
 }
 apply plugin: 'maven-publish'
 
-group 'org.inlambda.kiwi'
-version '0.3.0'
+group 'io.ib67.kiwi'
+version '0.3.0-SNAPSHOT'
 
 repositories {
     mavenCentral()

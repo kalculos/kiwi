@@ -22,4 +22,4 @@
 # SOFTWARE.
 #
 
-org.inlambda.kiwi.magic.plugin.KiwiJavacPlugin
+io.ib67.kiwi.magic.plugin.KiwiJavacPlugin
