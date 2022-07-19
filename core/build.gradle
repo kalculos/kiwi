@@ -2,8 +2,8 @@ plugins {
     id 'java'
 }
 
-group 'org.inlambda'
-version '0.0.1'
+group 'io.ib67.kiwi'
+version parent.version
 
 repositories {
     mavenCentral()
@@ -12,10 +12,8 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    compileOnly(project(":magic"))
-    annotationProcessor(project(":magic"))
 }
-//compileJava { options.compilerArgs << '-Xplugin:Kiwi' }
+
 test {
     useJUnitPlatform()
 }

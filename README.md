@@ -2,7 +2,7 @@
 
 简单好用强大的 Java 工具，请配合静态导入食用。
 
-Dive into [Kiwi](./src/main/java/org/inlambda/kiwi/Kiwi.java) to see some features.
+Dive into [Kiwi](core/src/main/java/org/inlambda/kiwi/Kiwi.java) to see some features.
 
 # Features
 
@@ -88,6 +88,8 @@ var luckyPlayer=Kiwi.lazyProxy(Player.class,()->RandomHelper.pick(players))
 ```
 
 ## Magics
+
+*尚未稳定，暂时移除*
 
 Kiwi 支持为类生成标准 JSON 格式的 `toString` 方法，极限效率，远超反射。
 

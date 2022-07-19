@@ -1,7 +1,9 @@
 plugins {
     id 'java'
+    id("me.him188.maven-central-publish") version "1.0.0-dev-1"
 }
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 group 'io.ib67.kiwi'
 version '0.3.0-SNAPSHOT'
@@ -14,28 +16,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
-if (System.getProperty("user.name").equals("icybear")) {
-    publishing {
-        repositories {
-            maven {
-                name = "bukkit.rip"
-                url = uri("https://mvn.bukkit.rip/releases")
-                credentials {
-                    username = bkrip_user
-                    password = bkrip_token
-                }
-            }
-        }
-        publications {
-            ilrepo(MavenPublication) {
-                artifactId this.project.name
-                from components.java
 
-            }
-        }
-    }
-}
 allprojects {
+
     apply plugin: 'maven-publish'
     afterEvaluate {
         dependencies {
