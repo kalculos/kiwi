@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'io.ib67.kiwi'
+group parent.group
 version parent.version
 
 repositories {

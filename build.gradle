@@ -1,12 +1,12 @@
 plugins {
     id 'java'
-    id("me.him188.maven-central-publish") version "1.0.0-dev-1"
+    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
 }
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'io.ib67.kiwi'
-version '0.3.0-SNAPSHOT'
+version '0.3.0'
 
 repositories {
     mavenCentral()
@@ -16,10 +16,30 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
-
-allprojects {
+subprojects {
+    apply plugin: 'me.him188.maven-central-publish'
 
     apply plugin: 'maven-publish'
+
+    mavenCentralPublish {
+        useCentralS01()
+        // If different from that from project, specify manually:
+        projectName = "kiwi"
+        artifactId = project.name
+        groupId = this.group
+        ///this.
+        //projectName = "Kiwi"
+        //  archivesBaseName("Kiwi-${this.name}-${this.version}")
+        // description from project.description by default
+        description("Kiwi is a collection of useful utilities for Java.")
+        projectUrl("https://codeberg.org/InlinedLambdas/Kiwi")
+        workingDir = file("/tmp/a")
+
+        connection = "scm:git:git://codeberg.org/InlinedLambdas/Kiwi"
+        licenseMit()
+
+        developer("iceBear67")
+    }
     afterEvaluate {
         dependencies {
             compileOnly 'org.jetbrains:annotations:23.0.0'
