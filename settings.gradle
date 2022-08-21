@@ -1,4 +1,5 @@
 rootProject.name = 'kiwi'
 include 'collection'
 include 'core'
+include 'collection-bukkit'
 
