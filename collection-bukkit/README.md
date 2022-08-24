@@ -15,6 +15,27 @@ OS: Arch Linux with latest GNU/Linux Kernel
 JVM: JDK 17.0.2, OpenJDK 64-Bit Server VM, 17.0.2+8-LTS (zulu, not zulu prime)
 ```
 
+## GsonPersistenceDataType
+
+```java
+
+@RequiredArgsConstructor
+public class GsonPersistenceDataType<Z> implements PersistentDataType<String, Z> {
+    @Getter
+    private final Class<Z> complexType;
+    private final Gson parser;
+    // ...
+}
+```
+
+## PlayerMap
+
+```java
+    static<T> PlayerMap<T> createWeakMap()
+static<T> PlayerMap<T> createUUIDBasedMap()
+static<T> PlayerMap<T> createPDCBasedMap(NamespacedKey key,PersistentDataType<?, T> type)
+```
+
 ## FastLoc2ObjMap
 
 A simple map implementation utilizing `Long2ObjectOpenHashMap`  
