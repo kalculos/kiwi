@@ -26,7 +26,9 @@ package io.ib67.kiwi.bukkit;
 
 import lombok.experimental.UtilityClass;
 import org.bukkit.Location;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 @UtilityClass
 public class LocHash {
     public static long posHash(final Location location) {

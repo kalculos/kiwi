@@ -22,41 +22,43 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.collection.bukkit;
+package io.ib67.kiwi.bukkit;
 
-import io.ib67.kiwi.collection.bukkit.maps.PDCPlayerMap;
-import io.ib67.kiwi.collection.bukkit.maps.SimplePlayerMap;
-import io.ib67.kiwi.collection.bukkit.maps.WeakPlayerMap;
-import org.bukkit.NamespacedKey;
-import org.bukkit.entity.Player;
+import com.google.gson.Gson;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.function.Function;
-
+/**
+ * This class helps you for dealing with simple persistent data.
+ *
+ * @param <Z>
+ */
 @ApiStatus.AvailableSince("0.3.1")
-public interface PlayerMap<T> extends Map<Player, T>, Function<Player, T> {
-    static <T> PlayerMap<T> createWeakMap() {
-        return new WeakPlayerMap<>();
-    }
+@RequiredArgsConstructor
+public class GsonPersistenceDataType<Z> implements PersistentDataType<String, Z> {
+    @Getter
+    private final Class<Z> complexType;
+    private final Gson parser;
 
-    /**
-     * Some returned collections may contain null for Player
-     *
-     * @param <T>
-     * @return
-     */
-    static <T> PlayerMap<T> createUUIDBasedMap() {
-        return new SimplePlayerMap<>();
-    }
-
-    static <T> PlayerMap<T> createPDCBasedMap(NamespacedKey key, PersistentDataType<?, T> type) {
-        return new PDCPlayerMap<>(type, key);
-    }
-
+    @NotNull
     @Override
-    default T apply(Player player) {
-        return get(player);
+    public Class<String> getPrimitiveType() {
+        return String.class;
+    }
+
+    @NotNull
+    @Override
+    public String toPrimitive(@NotNull Z complex, @NotNull PersistentDataAdapterContext context) {
+        return parser.toJson(complex);
+    }
+
+    @NotNull
+    @Override
+    public Z fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+        return parser.fromJson(primitive, complexType);
     }
 }
