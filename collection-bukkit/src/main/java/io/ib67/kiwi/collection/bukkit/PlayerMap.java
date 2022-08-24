@@ -24,9 +24,12 @@
 
 package io.ib67.kiwi.collection.bukkit;
 
+import io.ib67.kiwi.collection.bukkit.maps.PDCPlayerMap;
 import io.ib67.kiwi.collection.bukkit.maps.SimplePlayerMap;
 import io.ib67.kiwi.collection.bukkit.maps.WeakPlayerMap;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -44,6 +47,10 @@ public interface PlayerMap<T> extends Map<Player, T>, Function<Player, T> {
      */
     static <T> PlayerMap<T> createUUIDBasedMap() {
         return new SimplePlayerMap<>();
+    }
+    
+    static <T> PlayerMap<T> createPDCBasedMap(NamespacedKey key, PersistentDataType<?, T> type) {
+        return new PDCPlayerMap<>(type, key);
     }
 
     @Override
