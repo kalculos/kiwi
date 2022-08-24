@@ -45,12 +45,13 @@ You'd better use it directly instead of using a `Map` interface.
 - `yaw` and `pitch` is ignored.
 
 ```java
-Benchmark Mode Cnt Score Error Units
-        k.bukkit.FastLocHashBench.bukkitHashCode thrpt 3 147433.805 ± 30120.825ops/s
-        k.bukkit.FastLocHashBench.kiwiHashCode thrpt 3 154101.057 ±  6928.009ops/s
-        k.collection.Loc2ObjMaps.commonHashMapRead thrpt 3 54639.759 ± 13169.074ops/s
-        k.collection.Loc2ObjMaps.commonHashMapWrite thrpt 3 55941.784 ± 48699.401ops/s
-        k.collection.Loc2ObjMaps.kiwiHashMapRead thrpt 3 74833.467 ±  6228.279ops/s
-        k.collection.Loc2ObjMaps.kiwiHashMapWrite thrpt 3 54215.283 ±  6905.586ops/s
+Benchmark                                     Mode  Cnt       Score       Error  Units
+        k.bukkit.FastLocHashBench.bukkitHashCode     thrpt    3  140595.936 ± 33986.083  ops/s
+        k.bukkit.FastLocHashBench.kiwiHashCode       thrpt    3  154351.619 ± 39776.544  ops/s
+        k.collection.Loc2ObjMaps.commonHashMapRead   thrpt    3   62656.235 ± 39366.216  ops/s
+        k.collection.Loc2ObjMaps.commonHashMapWrite  thrpt    3   57711.273 ± 13330.564  ops/s
+        k.collection.Loc2ObjMaps.kiwiHashMapRead     thrpt    3   83885.242 ± 50416.401  ops/s
+        k.collection.Loc2ObjMaps.kiwiHashMapWrite    thrpt    3   75764.393 ±  8659.842  ops/s
+
 
 ```

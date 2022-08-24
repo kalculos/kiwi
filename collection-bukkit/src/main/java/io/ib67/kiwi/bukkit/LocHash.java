@@ -32,23 +32,20 @@ import org.jetbrains.annotations.ApiStatus;
 @UtilityClass
 public class LocHash {
     public static long posHash(final Location location) {
-        return longHash((int) (Double.doubleToLongBits(location.getX()) ^ (Double.doubleToLongBits(location.getX()) >>> 32)),
-                (int) (Double.doubleToLongBits(location.getY()) ^ (Double.doubleToLongBits(location.getY()) >>> 32)),
-                (int) (Double.doubleToLongBits(location.getZ()) ^ (Double.doubleToLongBits(location.getZ()) >>> 32)));
+        return longHash(Double.doubleToLongBits(location.getX()),
+                Double.doubleToLongBits(location.getY()),
+                Double.doubleToLongBits(location.getZ()));
     }
 
     public static boolean posEq(Location a, Location b) {
         return a.getWorld() == b.getWorld() &&
-                (Double.doubleToLongBits(a.getX()) ^ (Double.doubleToLongBits(a.getX()) >>> 32))
-                        == (Double.doubleToLongBits(b.getX()) ^ (Double.doubleToLongBits(b.getX()) >>> 32)) &&
-                (Double.doubleToLongBits(a.getY()) ^ (Double.doubleToLongBits(a.getY()) >>> 32))
-                        == (Double.doubleToLongBits(b.getY()) ^ (Double.doubleToLongBits(b.getY()) >>> 32)) &&
-                (Double.doubleToLongBits(a.getZ()) ^ (Double.doubleToLongBits(a.getZ()) >>> 32))
-                        == (Double.doubleToLongBits(b.getZ()) ^ (Double.doubleToLongBits(b.getZ()) >>> 32));
+                Math.floor(a.getX()) == Math.floor(b.getX()) &&
+                Math.floor(a.getY()) == Math.floor(b.getY()) &&
+                Math.floor(a.getZ()) == Math.floor(b.getZ());
     }
 
     // borrowed from baritone.
-    public static long longHash(final int x, final int y, final int z) {
+    public static long longHash(final long x, final long y, final long z) {
         long hash = 3241;
         hash = 3457689L * hash + x;
         hash = 8734625L * hash + y;
