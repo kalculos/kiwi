@@ -42,8 +42,8 @@ public final class RandomHelper {
         return (T) t.toArray()[ThreadLocalRandom.current().nextInt(t.size())];
     }
 
-    public static <T> T pickOrNull(List<T> t){
-        if(t.size() == 0)return null;
+    public static <T> T pickOrNull(List<T> t) {
+        if (t.size() == 0) return null;
         return t.get(ThreadLocalRandom.current().nextInt(t.size()));
     }
 
@@ -56,7 +56,15 @@ public final class RandomHelper {
         return ThreadLocalRandom.current().nextInt(bound);
     }
 
-    public static int number(int from, int to){
+    public static boolean bool() {
+        return ThreadLocalRandom.current().nextBoolean();
+    }
+
+    public static boolean bool(float possibility) {
+        return ThreadLocalRandom.current().nextDouble(1) > possibility;
+    }
+
+    public static int number(int from, int to) {
         return ThreadLocalRandom.current().nextInt(from, to);
     }
 
@@ -64,14 +72,14 @@ public final class RandomHelper {
         return number(9999);
     }
 
-    public static String string(){
+    public static String string() {
         return string(16);
     }
 
-    public static String string(int len){
+    public static String string(int len) {
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            sb.append((char)number(65,65+57));
+            sb.append((char) number(65, 65 + 57));
         }
         return sb.toString();
     }
