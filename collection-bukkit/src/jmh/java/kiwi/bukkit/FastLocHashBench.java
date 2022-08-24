@@ -54,7 +54,7 @@ public class FastLocHashBench {
         }
     }
 
-    @Benchmark
+@Benchmark
     public void bukkitHashCode(Blackhole blackhole) {
         for (Location location : locations) {
             blackhole.consume(location.hashCode());

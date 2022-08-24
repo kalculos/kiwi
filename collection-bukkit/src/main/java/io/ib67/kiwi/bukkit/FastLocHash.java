@@ -26,27 +26,28 @@ package io.ib67.kiwi.bukkit;
 
 import lombok.experimental.UtilityClass;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.jetbrains.annotations.ApiStatus;
 
 @UtilityClass
 public class FastLocHash {
     public static long posHash(final Location location) {
-        return longHash(worldHash(location.getWorld()),
-                (int) (Double.doubleToLongBits(location.getX()) ^ (Double.doubleToLongBits(location.getX()) >>> 32)),
+        return longHash((int) (Double.doubleToLongBits(location.getX()) ^ (Double.doubleToLongBits(location.getX()) >>> 32)),
                 (int) (Double.doubleToLongBits(location.getY()) ^ (Double.doubleToLongBits(location.getY()) >>> 32)),
                 (int) (Double.doubleToLongBits(location.getZ()) ^ (Double.doubleToLongBits(location.getZ()) >>> 32)));
     }
 
-    @ApiStatus.Internal
-    public static int worldHash(final World world) {
-        return world == null ? 0 : world.getUID().hashCode(); // Most server doesn't have too much worlds.
+    public static boolean posEq(Location a, Location b) {
+        return a.getWorld() == b.getWorld() &&
+                (Double.doubleToLongBits(a.getX()) ^ (Double.doubleToLongBits(a.getX()) >>> 32))
+                        == (Double.doubleToLongBits(b.getX()) ^ (Double.doubleToLongBits(b.getX()) >>> 32)) &&
+                (Double.doubleToLongBits(a.getY()) ^ (Double.doubleToLongBits(a.getY()) >>> 32))
+                        == (Double.doubleToLongBits(b.getY()) ^ (Double.doubleToLongBits(b.getY()) >>> 32)) &&
+                (Double.doubleToLongBits(a.getZ()) ^ (Double.doubleToLongBits(a.getZ()) >>> 32))
+                        == (Double.doubleToLongBits(b.getZ()) ^ (Double.doubleToLongBits(b.getZ()) >>> 32));
     }
 
     // borrowed from baritone.
-    public static long longHash(final int worldId, final int x, final int y, final int z) {
+    public static long longHash(final int x, final int y, final int z) {
         long hash = 3241;
-        hash = 1209428L * hash + worldId;
         hash = 3457689L * hash + x;
         hash = 8734625L * hash + y;
         hash = 2873465L * hash + z;

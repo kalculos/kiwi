@@ -27,6 +27,7 @@ package io.ib67.kiwi.collection.bukkit;
 import io.ib67.kiwi.bukkit.FastLocHash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import lombok.AllArgsConstructor;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,7 +38,22 @@ import java.util.Set;
 import java.util.function.Function;
 
 public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Location, T> {
-    private final Long2ObjectMap<T> map = new Long2ObjectOpenHashMap<>();
+    private final Long2ObjectMap<Node<T>> map = new Long2ObjectOpenHashMap<>();
+
+    public T get(final Location key) {
+        var node = map.get(FastLocHash.posHash(key));
+        if (node.next == null) {
+            return node.object;
+        } else {
+            while (node.next != null) {
+                node = node.next;
+                if (FastLocHash.posEq(node.key, key)) {
+                    return node.object;
+                }
+            }
+            return null;
+        }
+    }
 
     @Override
     public int size() {
@@ -69,15 +85,49 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
         return null;
     }
 
-    public T get(Location key) {
-        return map.get(FastLocHash.posHash(key));
-    }
-
     @Nullable
     @Override
-    public T put(Location key, T value) {
+    public T put(final Location key, final T value) {
 //        locations.add(key);
-        return map.put(FastLocHash.posHash(key), value);
+        final var hash = FastLocHash.posHash(key);
+        var node = map.get(hash);
+        if (node == null) {
+            map.put(hash, new Node<T>(key, value, null));
+            return value;
+        } else {
+            if (FastLocHash.posEq(node.key, key)) {
+                final var oldObj = node.object;
+                node.object = value;
+                return oldObj;
+            }
+            while (node.next != null) {
+                node = node.next;
+                if (FastLocHash.posEq(node.key, key)) {
+                    return node.object;
+                }
+            }
+            throw new IllegalStateException("This should never happen");
+        }
+    }
+
+    public T remove(final Location key) {
+        final var hash = FastLocHash.posHash(key);
+        var node = map.get(hash);
+        if (node == null) {
+            return null;
+        }
+        if (FastLocHash.posEq(node.key, key)) {
+            map.put(hash, node.next);
+        }
+        while (node.next != null) {
+            final var lastNode = node;
+            node = node.next;
+            if (FastLocHash.posEq(node.key, key)) {
+                lastNode.next = node.next;
+                return node.object;
+            }
+        }
+        throw new IllegalStateException("This should never happen");
     }
 
     @Override
@@ -89,8 +139,10 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
         return null;
     }
 
-    public T remove(Location key) {
-        return map.remove(FastLocHash.posHash(key));
+    @NotNull
+    @Override
+    public Collection<T> values() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -111,11 +163,11 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
         throw new UnsupportedOperationException();
     }
 
-
-    @NotNull
-    @Override
-    public Collection<T> values() {
-        return map.values();
+    @AllArgsConstructor
+    private static final class Node<T> {
+        private final Location key;
+        private T object;
+        private Node<T> next;
     }
 
     @NotNull
