@@ -28,7 +28,7 @@ import lombok.experimental.UtilityClass;
 import org.bukkit.Location;
 
 @UtilityClass
-public class FastLocHash {
+public class LocHash {
     public static long posHash(final Location location) {
         return longHash((int) (Double.doubleToLongBits(location.getX()) ^ (Double.doubleToLongBits(location.getX()) >>> 32)),
                 (int) (Double.doubleToLongBits(location.getY()) ^ (Double.doubleToLongBits(location.getY()) >>> 32)),

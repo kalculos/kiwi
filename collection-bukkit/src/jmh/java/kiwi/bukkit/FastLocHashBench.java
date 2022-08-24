@@ -25,7 +25,7 @@
 package kiwi.bukkit;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
-import io.ib67.kiwi.bukkit.FastLocHash;
+import io.ib67.kiwi.bukkit.LocHash;
 import org.bukkit.Location;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
@@ -64,7 +64,7 @@ public class FastLocHashBench {
     @Benchmark
     public void kiwiHashCode(Blackhole hole) {
         for (Location location : locations) {
-            hole.consume(FastLocHash.posHash(location));
+            hole.consume(LocHash.posHash(location));
         }
     }
 

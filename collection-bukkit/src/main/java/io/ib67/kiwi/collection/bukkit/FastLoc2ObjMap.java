@@ -24,7 +24,7 @@
 
 package io.ib67.kiwi.collection.bukkit;
 
-import io.ib67.kiwi.bukkit.FastLocHash;
+import io.ib67.kiwi.bukkit.LocHash;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import lombok.AllArgsConstructor;
@@ -41,13 +41,13 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
     private final Long2ObjectMap<Node<T>> map = new Long2ObjectOpenHashMap<>();
 
     public T get(final Location key) {
-        var node = map.get(FastLocHash.posHash(key));
+        var node = map.get(LocHash.posHash(key));
         if (node.next == null) {
             return node.object;
         } else {
             while (node.next != null) {
                 node = node.next;
-                if (FastLocHash.posEq(node.key, key)) {
+                if (LocHash.posEq(node.key, key)) {
                     return node.object;
                 }
             }
@@ -67,7 +67,7 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
 
     @Override
     public boolean containsKey(Object key) {
-        return map.containsKey(FastLocHash.posHash((Location) key));
+        return map.containsKey(LocHash.posHash((Location) key));
     }
 
     @Override
@@ -89,20 +89,20 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
     @Override
     public T put(final Location key, final T value) {
 //        locations.add(key);
-        final var hash = FastLocHash.posHash(key);
+        final var hash = LocHash.posHash(key);
         var node = map.get(hash);
         if (node == null) {
             map.put(hash, new Node<T>(key, value, null));
             return value;
         } else {
-            if (FastLocHash.posEq(node.key, key)) {
+            if (LocHash.posEq(node.key, key)) {
                 final var oldObj = node.object;
                 node.object = value;
                 return oldObj;
             }
             while (node.next != null) {
                 node = node.next;
-                if (FastLocHash.posEq(node.key, key)) {
+                if (LocHash.posEq(node.key, key)) {
                     return node.object;
                 }
             }
@@ -111,18 +111,18 @@ public final class FastLoc2ObjMap<T> implements Map<Location, T>, Function<Locat
     }
 
     public T remove(final Location key) {
-        final var hash = FastLocHash.posHash(key);
+        final var hash = LocHash.posHash(key);
         var node = map.get(hash);
         if (node == null) {
             return null;
         }
-        if (FastLocHash.posEq(node.key, key)) {
+        if (LocHash.posEq(node.key, key)) {
             map.put(hash, node.next);
         }
         while (node.next != null) {
             final var lastNode = node;
             node = node.next;
-            if (FastLocHash.posEq(node.key, key)) {
+            if (LocHash.posEq(node.key, key)) {
                 lastNode.next = node.next;
                 return node.object;
             }

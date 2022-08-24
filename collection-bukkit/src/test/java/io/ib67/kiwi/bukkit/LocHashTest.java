@@ -26,7 +26,7 @@ package io.ib67.kiwi.bukkit;
 
 import org.junit.jupiter.api.BeforeEach;
 
-class FastLocHashTest {
+class LocHashTest {
 
     @BeforeEach
     void setUp() {
