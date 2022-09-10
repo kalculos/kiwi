@@ -24,7 +24,7 @@
 
 package io.ib67.kiwi.collection.stack;
 
-import io.ib67.kiwi.Stack;
+import io.ib67.kiwi.collection.Stack;
 import org.jetbrains.annotations.ApiStatus;
 
 @ApiStatus.AvailableSince("0.2.3")

@@ -24,7 +24,7 @@
 
 package io.ib67.kiwi.collection.stack;
 
-import io.ib67.kiwi.Stack;
+import io.ib67.kiwi.collection.Stack;
 import io.ib67.kiwi.option.Option;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;

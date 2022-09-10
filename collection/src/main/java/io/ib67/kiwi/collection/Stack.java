@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi;
+package io.ib67.kiwi.collection;
 
 import io.ib67.kiwi.collection.stack.ArrayOpenStack;
 import io.ib67.kiwi.collection.stack.LinkedOpenStack;

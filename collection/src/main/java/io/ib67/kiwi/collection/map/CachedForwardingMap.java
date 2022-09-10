@@ -24,7 +24,7 @@
 
 package io.ib67.kiwi.collection.map;
 
-import io.ib67.kiwi.KiwiMap;
+import io.ib67.kiwi.collection.KiwiMap;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;

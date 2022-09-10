@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi;
+package io.ib67.kiwi.collection;
 
 import java.util.Map;
 import java.util.function.Function;
