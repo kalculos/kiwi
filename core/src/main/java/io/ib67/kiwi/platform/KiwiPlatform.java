@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,29 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.proxy;
+package io.ib67.kiwi.platform;
 
-import io.ib67.kiwi.lazy.LazySupplier;
-import lombok.RequiredArgsConstructor;
+public class KiwiPlatform {
+    public static final PlatformType CURRENT = getType();
+    public static final boolean IS_AOT = Boolean.getBoolean("com.oracle.graalvm.isaot");
+    public static final boolean HAS_GUI = isGuiSupported();
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-
-@RequiredArgsConstructor
-public class LazyProxy<T> implements InvocationHandler {
-    private final LazySupplier<T> lazyObject;
-
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        return method.invoke(lazyObject.get(), args);
+    private static boolean isGuiSupported() {
+        if (CURRENT == PlatformType.WINDOWS) {
+            return true; // why not? :)
+        }
+        // check environment variable.
+        return !System.getenv("XDG_SESSION_TYPE").isEmpty();
     }
+
+    private static PlatformType getType() {
+        var os_name = System.getProperty("os.name");
+        if (os_name.toLowerCase().contains("nux")) {
+            return PlatformType.LINUX;
+        } else if (os_name.toLowerCase().contains("win")) {
+            return PlatformType.WINDOWS;
+        }
+        return PlatformType.UNIX;
+    }
+
 }

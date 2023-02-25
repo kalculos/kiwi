@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi;
+package io.ib67.kiwi.collection.set;
 
 import io.ib67.kiwi.reflection.AccessibleClass;
 import org.jetbrains.annotations.ApiStatus;

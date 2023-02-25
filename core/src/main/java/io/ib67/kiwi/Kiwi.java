@@ -26,7 +26,8 @@ package io.ib67.kiwi;
 
 import io.ib67.kiwi.lazy.LazyFunction;
 import io.ib67.kiwi.lazy.LazySupplier;
-import io.ib67.kiwi.proxy.LazyProxy;
+import io.ib67.kiwi.lock.CloseableLock;
+import io.ib67.kiwi.lock.CloseableTryLock;
 import io.ib67.kiwi.reflection.AccessibleClass;
 import io.ib67.kiwi.tuple.Pair;
 import io.ib67.kiwi.tuple.Triple;
@@ -34,6 +35,8 @@ import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -66,11 +69,6 @@ public class Kiwi {
         return LazyFunction.by(function);
     }
 
-    @SuppressWarnings("unchecked")
-    public static <T> T lazyProxy(Class<T> tClass, Supplier<T> tSupplier) {
-        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), new Class[]{tClass}, new LazyProxy<>(byLazy(tSupplier)));
-    }
-
     public static <T> T todo(String msg) {
         throw new UnsupportedOperationException("TODO: " + msg);
     }
@@ -89,6 +87,14 @@ public class Kiwi {
 
     public static <T> AccessibleClass<T> accessClass(Class<T> clazz) {
         return AccessibleClass.of(clazz);
+    }
+
+    public static CloseableLock withLock(Lock lock) {
+        return new CloseableLock(lock);
+    }
+
+    public static CloseableTryLock withTryLock(Lock lock, long time, TimeUnit unit) throws InterruptedException {
+        return new CloseableTryLock(lock, time, unit);
     }
 
 }

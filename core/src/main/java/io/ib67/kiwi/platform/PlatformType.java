@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,28 +22,18 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi;
+package io.ib67.kiwi.platform;
 
-import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-import java.util.Iterator;
+@RequiredArgsConstructor
+public enum PlatformType {
+    WINDOWS("Windows NT",false),
+    LINUX("Linux",true),
+    UNIX("Unix or OSX",true);
 
-@AllArgsConstructor
-public class SingleIterator<T> implements Iterator<T> {
-    private T value;
-
-    @Override
-    public boolean hasNext() {
-        return value != null;
-    }
-
-    @Override
-    public T next() {
-        if (value == null) {
-            throw new IllegalStateException("No more elements");
-        }
-        var v = value;
-        value = null;
-        return v;
-    }
+    private final String name;
+    @Getter
+    private final boolean unix;
 }
