@@ -33,6 +33,7 @@ public enum PlatformType {
     LINUX("Linux",true),
     UNIX("Unix or OSX",true);
 
+    @Getter
     private final String name;
     @Getter
     private final boolean unix;
