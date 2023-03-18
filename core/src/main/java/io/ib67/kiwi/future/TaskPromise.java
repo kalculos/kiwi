@@ -47,7 +47,7 @@ public class TaskPromise<R, E> extends AbstractPromise<R, E> {
     }
 
     @Override
-    public void setResult(Result<R, E> result) {
+    protected void setResult(Result<R, E> result) { // override parent method to provide a implementation with synchronization
         super.setResult(result);
         synchronized (this) {
             this.notifyAll();

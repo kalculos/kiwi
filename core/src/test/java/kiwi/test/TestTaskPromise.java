@@ -22,36 +22,31 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.future;
+package kiwi.test;
 
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import io.ib67.kiwi.future.TaskPromise;
+import org.junit.jupiter.api.Test;
 
-/**
- * A {@link Promise} is a completable {@link Future} in order to make {@link Future} immutable. <br>
- * Once the result is set, it cannot be mutated anymore.
- *
- * @param <R> Type of result
- * @param <E> Type of exception
- */
-@ApiStatus.AvailableSince("0.4")
-public interface Promise<R, E> extends Future<R, E> {
-    /**
-     * Set the result to SUCCESS and notify handlers.
-     *
-     * @param result result, sometimes nullable.
-     */
-    void success(R result);
+import java.util.concurrent.atomic.AtomicBoolean;
 
-    /**
-     * Set the result to FAILURE and notify handlers.
-     *
-     * @param exception the reason, cannot be null.
-     * @throws IllegalArgumentException if exception is null.
-     */
-    void failure(@NotNull E exception);
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    default void fromResult(Result<R, E> anotherState) {
-        anotherState.onSuccess(this::success).onFailure(this::failure);
+public class TestTaskPromise {
+    @Test
+    public void onTestSuccess() {
+        var succeed = new AtomicBoolean(false);
+        var promise = new TaskPromise<String, Exception>();
+        promise.onSuccess(it -> succeed.set(it.equals("Yes")));
+        promise.success("Yes");
+        assertTrue(succeed.get());
+    }
+
+    @Test
+    public void onTestFailure() {
+        var succeed = new AtomicBoolean(false);
+        var promise = new TaskPromise<String, Exception>();
+        promise.onFailure(it -> succeed.set(it instanceof IllegalArgumentException));
+        promise.failure(new IllegalArgumentException());
+        assertTrue(succeed.get());
     }
 }
