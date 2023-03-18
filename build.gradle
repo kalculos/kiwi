@@ -32,10 +32,10 @@ subprojects {
         //  archivesBaseName("Kiwi-${this.name}-${this.version}")
         // description from project.description by default
         description("Kiwi is a collection of useful utilities for Java.")
-        projectUrl("https://codeberg.org/InlinedLambdas/Kiwi")
+        projectUrl("https://github.com/kalculos/Kiwi")
         workingDir = file("/tmp/a")
 
-        connection = "scm:git:git://codeberg.org/InlinedLambdas/Kiwi"
+        connection = "scm:git:git://github.com/kalculos/Kiwi"
         licenseMit()
 
         developer("iceBear67")
