@@ -90,7 +90,7 @@ public interface Future<R, E> {
      *
      * @return this
      */
-    default Future<R, E> syncUninterruptible() {
+    default Result<R, E> syncUninterruptible() {
         try {
             return sync();
         } catch (InterruptedException e) {

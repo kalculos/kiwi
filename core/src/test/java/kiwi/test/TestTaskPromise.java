@@ -39,6 +39,8 @@ public class TestTaskPromise {
         promise.onSuccess(it -> succeed.set(it.equals("Yes")));
         promise.success("Yes");
         assertTrue(succeed.get());
+        assertTrue(promise.isDone());
+        assertTrue(promise.syncUninterruptible().isSuccess());
     }
 
     @Test
@@ -48,5 +50,7 @@ public class TestTaskPromise {
         promise.onFailure(it -> succeed.set(it instanceof IllegalArgumentException));
         promise.failure(new IllegalArgumentException());
         assertTrue(succeed.get());
+        assertTrue(promise.isDone());
+        assertTrue(promise.syncUninterruptible().isFailed());
     }
 }
