@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 public class Result<R, E> implements Future<R, E> {
     protected final R result;
     @Getter
-    protected final E exception;
+    protected final E failure;
 
     public static <R, E> Result<R, E> ok(R result) {
         return new Result<>(result, null);
@@ -79,17 +79,17 @@ public class Result<R, E> implements Future<R, E> {
     @Override
     public Future<R, E> onFailure(Consumer<E> consumer) {
         if (isFailed()) {
-            consumer.accept(exception);
+            consumer.accept(failure);
         }
         return this;
     }
 
     public boolean isFailed() {
-        return exception != null;
+        return failure != null;
     }
 
     public boolean isSuccess() {
-        return exception == null; // result can be null
+        return failure == null; // result can be null
     }
 
     @Override
@@ -118,12 +118,12 @@ public class Result<R, E> implements Future<R, E> {
         if (isSuccess()) {
             return result;
         }
-        if (exception instanceof RuntimeException t) {
+        if (failure instanceof RuntimeException t) {
             throw t;
-        } else if (exception instanceof Throwable t) {
+        } else if (failure instanceof Throwable t) {
             throw new RuntimeException(t);
         } else {
-            throw new IllegalStateException(Objects.toString(exception));
+            throw new IllegalStateException(Objects.toString(failure));
         }
     }
 
@@ -144,7 +144,7 @@ public class Result<R, E> implements Future<R, E> {
      */
     public Result<?, ?> and(Result<?, ?> anotherResult) {
         if (isSuccess()) {
-            return anotherResult.isSuccess() ? this : Result.fail(anotherResult.getException());
+            return anotherResult.isSuccess() ? this : Result.fail(anotherResult.getFailure());
         }
         return this;
     }

@@ -69,7 +69,7 @@ public abstract class AbstractPromise<R, E> implements Promise<R, E> {
     @Override
     public Promise<R, E> onFailure(Consumer<E> consumer) {
         if (isDone()) {
-            if (getResult().isFailed()) consumer.accept(getResult().getException());
+            if (getResult().isFailed()) consumer.accept(getResult().getFailure());
         } else {
             failureHandlers.add(consumer);
         }
@@ -114,7 +114,7 @@ public abstract class AbstractPromise<R, E> implements Promise<R, E> {
     }
 
     protected void notifyFailure() {
-        var failure = this.getResult().getException();
+        var failure = this.getResult().getFailure();
         failureHandlers.forEach(it -> it.accept(failure));
     }
 }

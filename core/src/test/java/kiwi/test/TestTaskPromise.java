@@ -53,4 +53,15 @@ public class TestTaskPromise {
         assertTrue(promise.isDone());
         assertTrue(promise.syncUninterruptible().isFailed());
     }
+
+    @Test
+    public void onTestComplement() {
+        var succeed = new AtomicBoolean(false);
+        var promise = new TaskPromise<String, Exception>();
+        promise.onComplete(it -> succeed.set(it.getFailure() instanceof IllegalArgumentException));
+        promise.failure(new IllegalArgumentException());
+        assertTrue(succeed.get());
+        assertTrue(promise.isDone());
+        assertTrue(promise.syncUninterruptible().isFailed());
+    }
 }
