@@ -24,7 +24,11 @@
 
 package io.ib67.kiwi;
 
+import io.ib67.kiwi.exception.AnyRunnable;
+import io.ib67.kiwi.exception.AnySupplier;
+import io.ib67.kiwi.future.Promise;
 import io.ib67.kiwi.future.Result;
+import io.ib67.kiwi.future.TaskPromise;
 import io.ib67.kiwi.lazy.LazyFunction;
 import io.ib67.kiwi.lazy.LazySupplier;
 import io.ib67.kiwi.lock.CloseableLock;
@@ -37,6 +41,7 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -97,4 +102,14 @@ public class Kiwi {
         return new CloseableTryLock(lock, time, unit);
     }
 
+    public static <T> T deAsync(Consumer<Promise<T, ?>> asyncCodes) throws InterruptedException {
+        var promise = new TaskPromise<T, Object>();
+        asyncCodes.accept(promise);
+        return promise.sync().orElseThrow();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, R> T typeMagic(R r) { // useful when dealing with parameterized types.
+        return (T) r;
+    }
 }

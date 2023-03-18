@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,23 +22,18 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi;
-
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.Supplier;
+package io.ib67.kiwi.exception;
 
 @FunctionalInterface
-@ApiStatus.AvailableSince("0.1.0")
-public interface AnySupplier<T>{
-    T get() throws Throwable;
+public interface AnyRunnable {
+    void run() throws Throwable;
 
-    default Supplier<T> asSupplier() {
+    default Runnable toRunnable() {
         return () -> {
             try {
-                return get();
+                run();
             } catch (Throwable e) {
-                throw new IllegalStateException(e);
+                throw new RuntimeException(e);
             }
         };
     }
