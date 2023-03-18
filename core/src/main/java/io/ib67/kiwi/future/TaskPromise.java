@@ -35,7 +35,7 @@ import org.jetbrains.annotations.ApiStatus;
  * @param <E> Type of exception
  */
 @ApiStatus.AvailableSince("0.4")
-public class TaskPromise<R, E extends Exception> extends AbstractPromise<R, E> {
+public class TaskPromise<R, E> extends AbstractPromise<R, E> {
     @Override
     public Result<R, E> sync() throws InterruptedException {
         while (!isDone()) {
@@ -47,7 +47,7 @@ public class TaskPromise<R, E extends Exception> extends AbstractPromise<R, E> {
     }
 
     @Override
-    protected void setResult(Result<R, E> result) {
+    public void setResult(Result<R, E> result) {
         super.setResult(result);
         synchronized (this) {
             this.notifyAll();

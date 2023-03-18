@@ -51,49 +51,49 @@ public class SynchronizedPromise<R, E> implements Promise<R, E> {
 
     @Override
     public boolean isDone() {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.isDone();
         }
     }
 
     @Override
     public @Nullable R get() throws IllegalStateException {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.get();
         }
     }
 
     @Override
     public Future<R, E> onSuccess(Consumer<R> consumer) {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onSuccess(consumer);
         }
     }
 
     @Override
     public Future<R, E> onFailure(Consumer<E> consumer) {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onFailure(consumer);
         }
     }
 
     @Override
     public Future<R, E> onComplete(Consumer<Result<R, E>> consumer) {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onComplete(consumer);
         }
     }
 
     @Override
     public Result<R, E> sync() throws InterruptedException {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.sync();
         }
     }
 
     @Override
     public void success(R result) {
-        try (var lo = Kiwi.withLock(lock)) {
+        try (var ignored = Kiwi.withLock(lock)) {
             wrappedPromise.success(result);
         }
     }

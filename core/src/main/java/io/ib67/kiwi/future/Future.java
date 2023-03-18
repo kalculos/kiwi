@@ -27,6 +27,7 @@ package io.ib67.kiwi.future;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +38,7 @@ import java.util.function.Consumer;
  */
 @ApiStatus.AvailableSince("0.4")
 public interface Future<R, E> {
+
     /**
      * To check if the computation is done.
      *
@@ -94,5 +96,19 @@ public interface Future<R, E> {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * A utility to deal with JDK Future required APIs.
+     *
+     * @return JDK Future
+     * @apiNote The returned future is not fully capable.
+     */
+    default CompletableFuture<R> toStandardFuture() {
+        var future = new WrapperCompletableFuture<>(this);
+        onComplete(result -> result.onSuccess(future::complete).onFailure(fail -> {
+            if (fail instanceof Throwable t) future.completeExceptionally(t);
+        }));
+        return future;
     }
 }

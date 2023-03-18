@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,14 +22,15 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.collection;
+package io.ib67.kiwi.future;
 
-import java.util.Map;
-import java.util.function.Function;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
-public interface KiwiMap<K, V> extends Map<K, V>, Function<K, V> {
-    @Override
-    default V apply(K k) {
-        return get(k);
-    }
+import java.util.concurrent.CompletableFuture;
+
+@RequiredArgsConstructor
+@Getter
+public class WrapperCompletableFuture<T> extends CompletableFuture<T> {
+    private final Future<T, ?> originalFuture;
 }
