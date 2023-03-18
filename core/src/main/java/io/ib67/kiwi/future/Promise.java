@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +22,32 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.option;
+package io.ib67.kiwi.future;
 
-import lombok.EqualsAndHashCode;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * A serializable form of {@link Option}
+ * A {@link Promise} is a completable {@link Future} in order to make {@link Future} immutable. <br>
+ * Once the result is set, it cannot be mutated anymore.
  *
- * @param <T>
+ * @param <R> Type of result
+ * @param <E> Type of exception
  */
-@EqualsAndHashCode
-public final class Present<T> {
-    static final Present<?> NULL = new Present<>(null);
-    private final T v;
+@ApiStatus.AvailableSince("0.4")
+public interface Promise<R, E> extends Future<R, E> {
+    /**
+     * Set the result to SUCCESS and notify handlers.
+     *
+     * @param result result, sometimes nullable.
+     */
+    void success(R result);
 
-    Present(T value) {
-        this.v = value;
-    }
-
-    public Option<T> from() {
-        return Option.of(v);
-    }
+    /**
+     * Set the result to FAILURE and notify handlers.
+     *
+     * @param exception the reason, cannot be null.
+     * @throws IllegalArgumentException if exception is null.
+     */
+    void failure(@NotNull E exception);
 }

@@ -24,17 +24,22 @@
 
 package io.ib67.kiwi.lock;
 
+import org.jetbrains.annotations.ApiStatus;
+
 import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
+@ApiStatus.AvailableSince("0.4")
 public final class CloseableLock implements AutoCloseable {
     private final Lock lock;
-    public CloseableLock(Lock lock){
-        Objects.requireNonNull(this.lock = lock,"lock cannot be null");
+
+    public CloseableLock(Lock lock) {
+        Objects.requireNonNull(this.lock = lock, "lock cannot be null");
         lock.lock();
     }
+
     @Override
-    public void close() throws Exception {
+    public void close() {
         lock.unlock();
     }
 }

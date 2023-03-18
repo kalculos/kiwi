@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 
 package io.ib67.kiwi;
 
+import io.ib67.kiwi.future.Result;
 import io.ib67.kiwi.lazy.LazyFunction;
 import io.ib67.kiwi.lazy.LazySupplier;
 import io.ib67.kiwi.lock.CloseableLock;
@@ -34,7 +35,6 @@ import io.ib67.kiwi.tuple.Triple;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.lang.reflect.Proxy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
@@ -48,16 +48,16 @@ public class Kiwi {
             var result = supplier.get();
             return Result.ok(result);
         } catch (Throwable e) {
-            return Result.err(e);
+            return Result.fail(e);
         }
     }
 
     public static Result<?, ? extends Throwable> runAny(AnyRunnable runnable) {
         try {
             runnable.run();
-            return Result.ok();
+            return Result.ok(null);
         } catch (Throwable e) {
-            return Result.err(e);
+            return Result.fail(e);
         }
     }
 

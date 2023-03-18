@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,6 @@ import java.util.function.Predicate;
 @RequiredArgsConstructor
 @EqualsAndHashCode(cacheStrategy = EqualsAndHashCode.CacheStrategy.LAZY)
 public final class Pair<L, R> {
-    private int hashCode;
     public final L left;
     public final R right;
 
@@ -60,7 +59,7 @@ public final class Pair<L, R> {
         return (List<T>) List.of(left,right);
     }
 
-    public boolean norNull(){
+    public boolean notNull() {
         return left != null && right != null;
     }
 }

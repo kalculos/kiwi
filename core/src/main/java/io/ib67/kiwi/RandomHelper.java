@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,6 @@
 
 package io.ib67.kiwi;
 
-import io.ib67.kiwi.option.Option;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -45,11 +44,6 @@ public final class RandomHelper {
     public static <T> T pickOrNull(List<T> t) {
         if (t.size() == 0) return null;
         return t.get(ThreadLocalRandom.current().nextInt(t.size()));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Option<T> pick(Collection<T> t) {
-        return (Option<T>) Option.of(t.toArray()[ThreadLocalRandom.current().nextInt(t.size())]);
     }
 
     public static int number(int bound) {

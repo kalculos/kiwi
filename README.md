@@ -18,39 +18,34 @@ Kiwi.runAny(()->{
 
 `fromAny` 类似于 `runAny`，可以运行任意 Java 代码并且返回 `Result`。
 
-## Error Handling
+## Future, Promise and Result
 
-Kiwi 提供 `Result<T,E>` 帮助你处理异常。
+我们还提供了比 JDK 更好的 `Future<R,E>` 和 `Promise<R,E>` 实现，只需要几行代码继承 `AbstractPromise` 就可以无缝接入项目中。
+
+```java
+fetchOrder()
+        .sync() // returns Result<T,E>
+        // or
+        .onComplete/onSuccess/onFailure
+
+// and
+        promise.success(result);
+```
+
+你也可以使用 `Result<T,E>`(implements Future) 帮助你处理异常。
 
 ```java
 public Result<HttpResponse, HttpException> handle(HttpRequest req){
         // ... some business logics
         return Result.ok(HttpResponse.of(200,"OK"));
         // or
-        return Result.err();
+        return Result.fail();
         }
 
         connectDatabase().and(handle(xx))
         .fail(e->e.printStackTrace())
         .success(response->..do something)
 ```
-
-与 Result/Optional 类似，但 `Option` 适用于跟 null 打交道。
-
-```java
-Option.of(somethingNullable)
-        .map(s->s.toUpperCase())
-        .orElse("default");
-
-        Option.none()
-        .If(e->xx,e->do xx)
-        .Case(E->anotherValue,anotherValue->xx)
-        .IfCast(Player.class,optionOfPlayer->xx)
-        .IfNotNull(t->xx)
-        ........
-```
-
-配合 JDK Pattern Matching 使用更佳，因为 Option 是分类型的。（Some 和 None）
 
 ## Collection
 
@@ -59,12 +54,6 @@ Kiwi 提供了~~你四处寻觅的~~` Pair<A,B>` 和 `Triple<A,B,C>`
 ```java
 Kiwi.pairOf(...)
         Kiwi.tripleOf(...)
-```
-
-以及更快的 `Stack<E>`
-
-```java
-var stack=new LinkedOpenStack<>();
 ```
 
 还有 `WeakHashMap` 对应的 `WeakHashSet`

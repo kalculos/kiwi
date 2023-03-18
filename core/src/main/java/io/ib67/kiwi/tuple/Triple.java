@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ public final class Triple<A,B,C> {
         return (List<T>) List.of(a,b,c);
     }
 
-    public boolean norNull(){
+    public boolean notNull() {
         return a != null && b != null && c != null;
     }
 }

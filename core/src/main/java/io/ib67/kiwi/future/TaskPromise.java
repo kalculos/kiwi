@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,35 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.collection.stack;
+package io.ib67.kiwi.future;
 
-import io.ib67.kiwi.collection.Stack;
+
 import org.jetbrains.annotations.ApiStatus;
 
-@ApiStatus.AvailableSince("0.2.3")
-public interface ArrayStack<E> extends Stack<E> {
-    boolean hasSlot();
-
+/**
+ * A out-of-box {@link Promise} but not recommended to use it.<br>
+ * Instead, subclass {@link AbstractPromise} to create your own one according to your project architecture.
+ *
+ * @param <R> Type of result
+ * @param <E> Type of exception
+ */
+@ApiStatus.AvailableSince("0.4")
+public class TaskPromise<R, E extends Exception> extends AbstractPromise<R, E> {
     @Override
-    default int indexOf(E e) {
-        var elements = toArray();
-        var len = size();
-        for (int i = 0; i < len; i++) {
-            if (e == elements[i] || e.equals(elements[i])) {
-                return i;
+    public Result<R, E> sync() throws InterruptedException {
+        while (!isDone()) {
+            synchronized (this) {
+                this.wait();
             }
         }
-        return -1;
+        return result;
+    }
+
+    @Override
+    protected void setResult(Result<R, E> result) {
+        super.setResult(result);
+        synchronized (this) {
+            this.notifyAll();
+        }
     }
 }
