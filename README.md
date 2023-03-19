@@ -9,3 +9,7 @@ dependencies {
     api "io.ib67.kiwi:collection:$kiwiVersion"
 }
 ```
+
+# Usage
+
+Please refer to [documentation](https://kalculos.github.io/document/kiwi/).
