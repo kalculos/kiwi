@@ -6,7 +6,7 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
 group 'io.ib67.kiwi'
-version '0.4.1'
+version '0.4.2'
 
 repositories {
     mavenCentral()
