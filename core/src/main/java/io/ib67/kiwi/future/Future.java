@@ -38,6 +38,29 @@ import java.util.function.Consumer;
  */
 @ApiStatus.AvailableSince("0.4")
 public interface Future<R, E> {
+    /**
+     * Subscribe to successful results, or invoke the handler if the future is done.
+     *
+     * @param consumer handler
+     * @return this
+     */
+    Future<R, E> onSuccess(SuccessHandler<R> consumer);
+
+    /**
+     * Subscribe to exceptions, or invoke the handler if the future is failed.
+     *
+     * @param consumer handler
+     * @return this
+     */
+    Future<R, E> onFailure(FailureHandler<E> consumer);
+
+    /**
+     * Your handler will be called when the future is done, regardless of success or failure.
+     *
+     * @param consumer handler
+     * @return this
+     */
+    Future<R, E> onComplete(ComplementHandler<R, E> consumer);
 
     /**
      * To check if the computation is done.
@@ -54,29 +77,15 @@ public interface Future<R, E> {
      */
     @Nullable R get() throws IllegalStateException;
 
-    /**
-     * Subscribe to successful results, or invoke the handler if the future is done.
-     *
-     * @param consumer handler
-     * @return this
-     */
-    Future<R, E> onSuccess(Consumer<R> consumer);
+    // type mark
+    interface SuccessHandler<R> extends Consumer<R> {
+    }
 
-    /**
-     * Subscribe to exceptions, or invoke the handler if the future is failed.
-     *
-     * @param consumer handler
-     * @return this
-     */
-    Future<R, E> onFailure(Consumer<E> consumer);
+    interface FailureHandler<E> extends Consumer<E> {
+    }
 
-    /**
-     * Your handler will be called when the future is done, regardless of success or failure.
-     *
-     * @param consumer handler
-     * @return this
-     */
-    Future<R, E> onComplete(Consumer<Result<R, E>> consumer);
+    interface ComplementHandler<R, E> extends Consumer<Result<R, E>> {
+    }
 
     /**
      * Blocks current thread until the computation is done.

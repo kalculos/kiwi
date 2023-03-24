@@ -37,9 +37,7 @@ import java.util.function.Consumer;
 
 @ApiStatus.AvailableSince("0.4")
 public abstract class AbstractPromise<R, E> implements Promise<R, E> {
-    protected final List<Consumer<R>> successHandlers = new ArrayList<>();
-    protected final List<Consumer<E>> failureHandlers = new ArrayList<>();
-    protected final List<Consumer<Result<R, E>>> complementListeners = new ArrayList<>();
+    protected final List<Consumer> handlers = new ArrayList<>(0);
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PROTECTED)
@@ -57,31 +55,31 @@ public abstract class AbstractPromise<R, E> implements Promise<R, E> {
     }
 
     @Override
-    public Promise<R, E> onSuccess(Consumer<R> consumer) {
+    public Promise<R, E> onSuccess(SuccessHandler<R> consumer) {
         if (isDone()) {
             if (getResult().isSuccess()) consumer.accept(getResult().get());
         } else {
-            successHandlers.add(consumer);
+            handlers.add(consumer);
         }
         return this;
     }
 
     @Override
-    public Promise<R, E> onFailure(Consumer<E> consumer) {
+    public Promise<R, E> onFailure(FailureHandler<E> consumer) {
         if (isDone()) {
             if (getResult().isFailed()) consumer.accept(getResult().getFailure());
         } else {
-            failureHandlers.add(consumer);
+            handlers.add(consumer);
         }
         return this;
     }
 
     @Override
-    public Future<R, E> onComplete(Consumer<Result<R, E>> consumer) {
+    public Future<R, E> onComplete(ComplementHandler<R, E> consumer) {
         if (isDone()) {
             consumer.accept(getResult());
         } else {
-            complementListeners.add(consumer);
+            handlers.add(consumer);
         }
         return this;
     }
@@ -92,29 +90,29 @@ public abstract class AbstractPromise<R, E> implements Promise<R, E> {
     @Override
     public void success(R r) {
         setResult(Result.ok(r));
-        notifyCompleted();
-        notifySuccess();
+        notifyHandlers();
     }
 
-    protected void notifyCompleted() {
-        var result = getResult();
-        complementListeners.forEach(it -> it.accept(result));
-    }
-
-    protected void notifySuccess() {
-        var result = this.getResult().get();
-        successHandlers.forEach(it -> it.accept(result));
+    private void notifyHandlers() {
+        final var result = getResult();
+        if (!result.isDone()) throw new IllegalStateException("This promise is not completed.");
+        final var succeed = result.isSuccess();
+        final var success = result.result;
+        final var failure = result.failure;
+        for (Consumer handler : handlers) {
+            if (succeed && (handler instanceof Future.SuccessHandler successHandler)) {
+                successHandler.accept(success);
+            } else if (!succeed && (handler instanceof Future.FailureHandler failureHandler)) {
+                failureHandler.accept(failure);
+            } else if (handler instanceof Future.ComplementHandler complementHandler) {
+                complementHandler.accept(result);
+            }
+        }
     }
 
     @Override
     public void failure(@NotNull E exception) {
         setResult(Result.fail(exception));
-        notifyCompleted();
-        notifyFailure();
-    }
-
-    protected void notifyFailure() {
-        var failure = this.getResult().getFailure();
-        failureHandlers.forEach(it -> it.accept(failure));
+        notifyHandlers();
     }
 }

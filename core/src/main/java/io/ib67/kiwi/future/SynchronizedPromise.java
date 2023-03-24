@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
 
@@ -64,21 +63,21 @@ public class SynchronizedPromise<R, E> implements Promise<R, E> {
     }
 
     @Override
-    public Future<R, E> onSuccess(Consumer<R> consumer) {
+    public Future<R, E> onSuccess(SuccessHandler<R> consumer) {
         try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onSuccess(consumer);
         }
     }
 
     @Override
-    public Future<R, E> onFailure(Consumer<E> consumer) {
+    public Future<R, E> onFailure(FailureHandler<E> consumer) {
         try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onFailure(consumer);
         }
     }
 
     @Override
-    public Future<R, E> onComplete(Consumer<Result<R, E>> consumer) {
+    public Future<R, E> onComplete(ComplementHandler<R, E> consumer) {
         try (var ignored = Kiwi.withLock(lock)) {
             return wrappedPromise.onComplete(consumer);
         }
@@ -86,9 +85,7 @@ public class SynchronizedPromise<R, E> implements Promise<R, E> {
 
     @Override
     public Result<R, E> sync() throws InterruptedException {
-        try (var ignored = Kiwi.withLock(lock)) {
-            return wrappedPromise.sync();
-        }
+        return wrappedPromise.sync();
     }
 
     @Override

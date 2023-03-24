@@ -30,7 +30,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -69,7 +68,7 @@ public class Result<R, E> implements Future<R, E> {
     }
 
     @Override
-    public Future<R, E> onSuccess(Consumer<R> consumer) {
+    public Future<R, E> onSuccess(SuccessHandler<R> consumer) {
         if (isSuccess()) {
             consumer.accept(result);
         }
@@ -77,7 +76,7 @@ public class Result<R, E> implements Future<R, E> {
     }
 
     @Override
-    public Future<R, E> onFailure(Consumer<E> consumer) {
+    public Future<R, E> onFailure(FailureHandler<E> consumer) {
         if (isFailed()) {
             consumer.accept(failure);
         }
@@ -93,7 +92,7 @@ public class Result<R, E> implements Future<R, E> {
     }
 
     @Override
-    public Future<R, E> onComplete(Consumer<Result<R, E>> consumer) {
+    public Future<R, E> onComplete(ComplementHandler<R, E> consumer) {
         consumer.accept(this);
         return this;
     }
