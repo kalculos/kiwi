@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2024 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,22 +22,29 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.collection.list;
+package io.ib67.kiwi.collection.map;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
+import java.util.Map;
 
 /**
- * A {@link List<T>} whose elements are not null.
- *
- * @param <T>
+ * a Map whose values are not null.
+ * @param <K>
+ * @param <V>
  */
-public interface NonNullList<T> extends List<T> {
-    static <T> NonNullList<T> newMutableList(T... elements) {
-        if (elements.length == 0) {
-            return new NonNullArrayList<>();
-        }
-        return new NonNullArrayList<>(elements);
+@ApiStatus.AvailableSince("0.5.0")
+public interface NonNullMap<K, V> extends Map<K, V> {
+    static <K, V> NonNullMap<K, V> newMutableMap() {
+        return new NonNullHashMap<>();
+    }
+
+    static <K, V> NonNullMap<K, V> newMutableMap(int capacity, float loadFactor) {
+        return new NonNullHashMap<>(capacity, loadFactor);
+    }
+
+    static <K, V> NonNullMap<K, V> newMutableMap(Map<K, V> toCopy) {
+        return new NonNullHashMap<>(toCopy);
     }
 }

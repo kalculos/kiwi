@@ -24,16 +24,34 @@
 
 package io.ib67.kiwi.collection.list;
 
-import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 
-@RequiredArgsConstructor
-class NullIntolerantList<T> implements NonNullList<T> {
+class NonNullArrayList<T> implements NonNullList<T> {
+    private static final int DEFAULT_CAPACITY = 10;
     private final List<T> list;
+
+    NonNullArrayList() {
+        this(DEFAULT_CAPACITY);
+    }
+
+    NonNullArrayList(int capacity) {
+        this.list = new ArrayList<>(capacity);
+    }
+
+    NonNullArrayList(T... elements) {
+        this(elements.length);
+        for (T element : elements) {
+            add(element);
+        }
+    }
+
+    NonNullArrayList(List<T> list) {
+        this.list = list;
+    }
 
     @Override
     public int size() {
@@ -70,11 +88,13 @@ class NullIntolerantList<T> implements NonNullList<T> {
 
     @Override
     public boolean add(T t) {
-        return list.add(requireNonNull(t, "The element cannot be null"));
+        if (t == null) return false;
+        return list.add(t);
     }
 
     @Override
     public boolean remove(Object o) {
+        if (o == null) return false;
         return list.remove(o);
     }
 
@@ -136,18 +156,24 @@ class NullIntolerantList<T> implements NonNullList<T> {
 
     @Override
     public int indexOf(Object o) {
+        if (o == null) {
+            return -1;
+        }
         return list.indexOf(o);
     }
 
     @Override
     public int lastIndexOf(Object o) {
+        if (o == null) {
+            return -1;
+        }
         return list.lastIndexOf(o);
     }
 
     @NotNull
     @Override
     public ListIterator<T> listIterator() {
-        return list.listIterator();
+        return new NullIntolerantListIterator<>(list.listIterator());
     }
 
     @NotNull
@@ -159,6 +185,6 @@ class NullIntolerantList<T> implements NonNullList<T> {
     @NotNull
     @Override
     public List<T> subList(int fromIndex, int toIndex) {
-        return list.subList(fromIndex, toIndex);
+        return new NonNullArrayList<>(list.subList(fromIndex, toIndex));
     }
 }

@@ -85,15 +85,17 @@ public class Lists {
     }
 
     /**
-     * Returns a list view preventing null from being added into the list.<br/>
-     * Such bulk operations as {@link List#addAll(Collection)} will be slower. Null elements in the origin won't be noticed by the decorator.
+     * Returns a copied list which prevents null from being added into the list.<br/>
+     * Such bulk operations as {@link List#addAll(Collection)} will be slower.
      *
      * @param origin original list
      * @param <T>    type of Element
      * @return null-intolerant list
+     * @deprecated Use
      */
+    @Deprecated
     public static <T> NonNullList<T> noNullList(List<T> origin) {
-        return new NullIntolerantList<>(origin);
+        return new NonNullArrayList<>(origin);
     }
 
     @SafeVarargs
