@@ -41,7 +41,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -100,16 +99,5 @@ public class Kiwi {
 
     public static CloseableTryLock withTryLock(Lock lock, long time, TimeUnit unit) throws InterruptedException {
         return new CloseableTryLock(lock, time, unit);
-    }
-
-    public static <T> T deAsync(Consumer<Promise<T, ?>> asyncCodes) throws InterruptedException {
-        var promise = new TaskPromise<T, Object>();
-        asyncCodes.accept(promise);
-        return promise.sync().orElseThrow();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T, R> T typeMagic(R r) { // useful when dealing with parameterized types.
-        return (T) r;
     }
 }

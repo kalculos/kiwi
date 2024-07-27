@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2024 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 
 @ApiStatus.AvailableSince("0.4")
 public abstract class AbstractPromise<R, E> implements Promise<R, E> {
-    protected final List<Consumer> handlers = new ArrayList<>(0);
+    protected final List<Consumer> handlers = new ArrayList<>();
 
     @Getter(AccessLevel.PROTECTED)
     @Setter(AccessLevel.PROTECTED)
