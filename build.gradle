@@ -1,43 +1,27 @@
 plugins {
     id 'java'
-    id("me.him188.maven-central-publish") version "1.0.0-dev-3"
+    id("io.freefair.lombok") version "8.13.1"
 }
 apply plugin: 'maven-publish'
 apply plugin: 'signing'
 
-group property("project.group")
-version property("project.version")
-
-subprojects {
+allprojects {
     apply plugin: 'java'
-    apply plugin: 'me.him188.maven-central-publish'
     apply plugin: 'maven-publish'
+    apply plugin: 'io.freefair.lombok'
 
-    project.version = parent.version
-    project.group = parent.group
+    group property("project.group")
+    version property("project.version")
 
-    mavenCentralPublish {
-        useCentralS01()
-        projectName = "kiwi"
-        artifactId = project.name
-        groupId = project.group
-        description("Kiwi is a collection of useful utilities for Java.")
-        projectUrl("https://github.com/kalculos/Kiwi")
-        workingDir = file("/tmp/a")
-
-        connection = "scm:git:git://github.com/kalculos/Kiwi"
-        licenseMit()
-
-        developer("iceBear67")
-    }
     repositories {
+        mavenLocal()
         mavenCentral()
     }
+}
 
+subprojects {
     dependencies {
         compileOnly 'org.jetbrains:annotations:23.0.0'
-        compileOnly 'org.projectlombok:lombok:1.18.24'
-        annotationProcessor 'org.projectlombok:lombok:1.18.24'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     }
