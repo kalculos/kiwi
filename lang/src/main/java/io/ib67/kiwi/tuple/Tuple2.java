@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.tuple;
 
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.Predicate;
-
-@FunctionalInterface
-@ApiStatus.AvailableSince("0.4.1")
-public interface AnyPredicate<T> {
-    boolean test(T t) throws Throwable;
-
-    default Predicate<T> toPredicate() {
-        return t -> {
-            try {
-                return test(t);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
+public record Tuple2<A,B>(A a, B b) implements Tuple{
 }

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
-@ApiStatus.AvailableSince("0.1.0")
 public final class RandomHelper {
 
     @SuppressWarnings("unchecked")

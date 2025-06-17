@@ -24,8 +24,6 @@
 
 package io.ib67.kiwi.reflection;
 
-import org.jetbrains.annotations.ApiStatus;
-
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -37,7 +35,7 @@ import java.util.Objects;
  * @author IzzelAliz
  */
 @SuppressWarnings("all")
-@ApiStatus.AvailableSince("0.1.0")
+
 public class Unsafe {
 
     private static final sun.misc.Unsafe unsafe;

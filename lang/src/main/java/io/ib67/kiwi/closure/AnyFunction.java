@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2022 InlinedLambdas and Contributors
+ * Copyright (c) 2023 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,40 +22,24 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.lazy;
+package io.ib67.kiwi.closure;
 
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
-/**
- * A thread safe supplier that caches result.
- *
- * @param <V>
- */
-@ApiStatus.AvailableSince("0.1.0")
-public final class LazySupplier<V> implements Supplier<V>{
-    private final Supplier<V> supplier;
-    private volatile V result;
+@FunctionalInterface
+@ApiStatus.AvailableSince("0.4.1")
+public interface AnyFunction<T, R> {
+    R apply(T t) throws Exception;
 
-    private LazySupplier(Supplier<V> supplier) {
-        this.supplier = supplier;
-        this.result = null;
-    }
-
-    public static <V> LazySupplier<V> by(Supplier<V> supplier){
-        return new LazySupplier<>(supplier);
-    }
-
-    @Override
-    public V get(){
-        if(result == null){
-            synchronized (this) {
-                if(result==null){
-                    result = supplier.get();
-                }
+    default Function<T, R> wrap() {
+        return t -> {
+            try {
+                return apply(t);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        }
-        return result;
+        };
     }
 }

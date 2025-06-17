@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.tuple;
 
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.Consumer;
-
-@FunctionalInterface
-@ApiStatus.AvailableSince("0.4.1")
-public interface AnyConsumer<T> {
-    void consume(T object) throws Throwable;
-
-    default Consumer<T> toConsumer() {
-        return c -> {
-            try {
-                consume(c);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
+public record Tuple5<A, B, C, D, E>(A a, B b, C c, D d, E e) implements Tuple{
 }

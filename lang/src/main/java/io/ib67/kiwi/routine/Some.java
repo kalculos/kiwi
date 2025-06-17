@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,8 +22,18 @@
  * SOFTWARE.
  */
 
-/**
- * Interfaces in this package are used to declare that your API will handle any exceptions thrown from users' lambdas.<br/>
- * It is your responsibility to handle these exceptions, you may use these with a "exceptionHandler" or update some states, etc.
- */
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.routine;
+
+import org.jetbrains.annotations.Nullable;
+
+public record Some<T>(T value) implements Result<T> {
+    @Override
+    public @Nullable T result() {
+        return value;
+    }
+
+    @Override
+    public void accept(InterruptibleConsumer<T> consumer) throws Interruption{
+        consumer.onValue(value);
+    }
+}

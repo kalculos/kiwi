@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,18 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.tuple;
 
-import java.util.function.UnaryOperator;
-
-public interface AnyUnaryOperator<T> extends AnyFunction<T, T> {
-    default UnaryOperator<T> toUnaryOperator() {
-        return t -> {
-            try {
-                return apply(t);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
+public record Tuple1<T>(T value) implements Tuple{
 }

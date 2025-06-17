@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,21 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.lock;
+package io.ib67.kiwi.routine;
 
-import org.jetbrains.annotations.ApiStatus;
+public class Interruption extends Exception {
+    public static final Interruption INTERRUPTION = new Interruption();
 
-import java.util.Objects;
-import java.util.concurrent.locks.Lock;
-
-@ApiStatus.AvailableSince("0.4")
-public final class CloseableLock implements AutoCloseable {
-    private final Lock lock;
-
-    public CloseableLock(Lock lock) {
-        Objects.requireNonNull(this.lock = lock, "lock cannot be null");
-        lock.lock();
+    private Interruption() {
     }
 
     @Override
-    public void close() {
-        lock.unlock();
+    public synchronized Throwable fillInStackTrace() {
+        return this;
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        return new StackTraceElement[0];
     }
 }

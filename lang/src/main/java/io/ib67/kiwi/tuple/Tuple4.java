@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,24 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.tuple;
 
-import org.jetbrains.annotations.ApiStatus;
-
-import java.util.function.Function;
-
-@FunctionalInterface
-@ApiStatus.AvailableSince("0.4.1")
-public interface AnyFunction<T, R> {
-    R apply(T t) throws Throwable;
-
-    default Function<T, R> toFunction() {
-        return t -> {
-            try {
-                return apply(t);
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
+public record Tuple4<A, B, C, D>(A a, B b, C c, D d) implements Tuple {
 }

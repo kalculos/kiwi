@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2023 InlinedLambdas and Contributors
+ * Copyright (c) 2025 InlinedLambdas and Contributors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.exception;
+package io.ib67.kiwi.tuple;
 
-@FunctionalInterface
-public interface AnyRunnable {
-    void run() throws Throwable;
-
-    default Runnable toRunnable() {
-        return () -> {
-            try {
-                run();
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
-        };
-    }
+public record Tuple3<A, B, C>(A a, B b, C c) implements Tuple {
 }
