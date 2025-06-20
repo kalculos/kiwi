@@ -137,4 +137,30 @@ class TestUni {
 
         uni.reduce(Integer::sum).onItem(value -> assertEquals(6, value));
     }
+
+    @Test
+    void testUniq(){
+        Uni<Integer> uni = c -> {
+            int i = 0;
+            while(true){
+                c.onValue(i++);
+                c.onValue(i);
+            }
+        };
+        // sum [0 to 4]
+        assertEquals(10, uni.unique().limit(5).reduce(Integer::sum).takeOne());
+    }
+    @Test
+    void testMultiMap(){
+        Uni<Integer> uni = c -> {
+            int i = 0;
+            while(true){
+                c.onValue(i++);
+            }
+        };
+        uni.<Integer>multiMap((i, sink) -> {
+            sink.onValue(i);
+            sink.onValue(i);
+        }).limit(2).onItem(value -> assertEquals(0, value));
+    }
 }

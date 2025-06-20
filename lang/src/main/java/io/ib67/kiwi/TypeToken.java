@@ -75,6 +75,7 @@ public class TypeToken<C> {
      * @param anotherToken tt to be copied
      */
     public TypeToken(TypeToken<C> anotherToken) {
+        Objects.requireNonNull(anotherToken);
         this.baseTypeRaw = anotherToken.baseTypeRaw;
         this.typeParams = Arrays.copyOf(anotherToken.typeParams, anotherToken.typeParams.length);
         this.hashCode = anotherToken.hashCode();
@@ -87,6 +88,8 @@ public class TypeToken<C> {
     }
 
     private TypeToken(Class<?> selfTypeRaw, TypeToken<?>... typeParams) {
+        Objects.requireNonNull(selfTypeRaw);
+        Objects.requireNonNull(typeParams);
         this.baseTypeRaw = selfTypeRaw;
         this.typeParams = typeParams;
         if (selfTypeRaw.isArray()) {
@@ -112,6 +115,8 @@ public class TypeToken<C> {
      * @return typeToken
      */
     public static <C> TypeToken<C> getParameterized(Class<C> type, Type... actualTypeParams) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(actualTypeParams);
         var subTokens = new TypeToken<?>[actualTypeParams.length];
         var params = type.getTypeParameters();
         if (params.length != actualTypeParams.length) {
@@ -140,6 +145,7 @@ public class TypeToken<C> {
      */
     @Contract("_, _ -> new")
     public static TypeToken<?> reduceBounds(TypeToken<?> type, boolean liftBySuper) {
+        Objects.requireNonNull(type);
         return switch (type.getWildcardKind()) {
             case SUPER ->
                     liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), liftBySuper) : OBJECT;
@@ -287,6 +293,7 @@ public class TypeToken<C> {
      * @return typeToken
      */
     public TypeToken<?> resolveType(Type type) {
+        Objects.requireNonNull(type);
         if (type instanceof TypeVariable<?> typeVar) {
             var params = baseTypeRaw.getTypeParameters();
             for (int i = 0; i < params.length; i++) { //todo doc this order
@@ -322,6 +329,7 @@ public class TypeToken<C> {
     @NotNull
     @SuppressWarnings("unchecked")
     public TypeToken<? super C> inferType(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
         if (clazz == baseTypeRaw) return this;
         if (this.isWildcard())
             throw new IllegalArgumentException("Cannot flatten a wildcard type.");
@@ -350,6 +358,7 @@ public class TypeToken<C> {
      */
     @SuppressWarnings("unchecked")
     private TypeToken<? super C> resolveGenericParent(Type type) {
+        Objects.requireNonNull(type);
         return switch (type) {
             case ParameterizedType parameterizedType -> {
                 var clazz = (Class<? super C>) parameterizedType.getRawType();

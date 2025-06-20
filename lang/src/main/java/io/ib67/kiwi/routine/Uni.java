@@ -29,7 +29,10 @@ import io.ib67.kiwi.closure.AnySupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.BitSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -95,8 +98,13 @@ public interface Uni<T> {
         });
     }
 
-    default <M> Uni<M> multiMap(BiConsumer<T, InterruptibleConsumer<M>> mapper) {
-        return c -> accept(t -> mapper.accept(t, c));
+    default Uni<T> unique() {
+        var set = new HashSet<>();
+        return filter(set::add);
+    }
+
+    default <M> Uni<M> multiMap(InterruptibleBiConsumer<T, InterruptibleConsumer<M>> mapper) {
+        return c -> accept(t -> mapper.onValue(t, c));
     }
 
     default Uni<T> limit(int limit) {
@@ -159,7 +167,7 @@ public interface Uni<T> {
                 accept(t -> {
                     if (buffer[0] == null) {
                         buffer[0] = t;
-                    }else{
+                    } else {
                         buffer[0] = reducer.apply((T) buffer[0], t);
                     }
                 });
@@ -207,5 +215,24 @@ public interface Uni<T> {
         }
 
         void onValue(T t) throws Interruption;
+    }
+
+    @FunctionalInterface
+    interface InterruptibleBiConsumer<A,B> extends BiConsumer<A,B> {
+
+        /**
+         * Also see {@link InterruptibleConsumer#accept(InterruptibleConsumer)}
+         * @param a the first input argument
+         * @param b the second input argument
+         */
+        @Override
+        @Deprecated
+        default void accept(A a, B b){
+            try{
+                onValue(a,b);
+            }catch (Interruption ignored){}
+        }
+
+        void onValue(A a, B b) throws Interruption;
     }
 }
