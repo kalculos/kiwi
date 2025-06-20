@@ -28,44 +28,113 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TestTypeToken {
     @Test
-    @SneakyThrows
-    public void testResolveType() {
-        class A<T> {
-            List<List<T>> fieldA;
+    public void testTypeResolveConstructor() {
+        var token = new TypeToken<List<String>>() {
+        };
+        assertEquals(List.class, token.getBaseTypeRaw());
+        assertEquals(String.class, token.getTypeParams().getFirst().getBaseTypeRaw());
+    }
+
+    @Test
+    public void testGetParameterized() {
+        var tokenString = TypeToken.getParameterized(List.class, String.class);
+        assertEquals(List.class, tokenString.getBaseTypeRaw());
+        assertEquals(String.class, tokenString.getTypeParams().getFirst().getBaseTypeRaw());
+        assertEquals(new TypeToken<List<String>>() {
+        }, tokenString);
+    }
+
+    @Test
+    public void testArray(){
+        var token = new TypeToken<List<String[]>[]>(){};
+        assertTrue(token.isArray());
+        assertEquals("List<String[]>[]", token.toString());
+    }
+
+    @Test
+    public void testEquals(){
+        var tokenString = TypeToken.getParameterized(List.class, String.class);
+        var token = new TypeToken<List<String>>() {
+        };
+        assertEquals(tokenString, token);
+        assertNotEquals(null, token);
+        assertEquals(token, token);
+    }
+
+    @Test
+    public void testResolve() {
+        var token = TypeToken.resolve(List.class);
+        assertEquals(List.class, token.getBaseTypeRaw());
+        assertEquals(Object.class, token.getTypeParams().getFirst().getBaseTypeRaw());
+        class Box<S extends String> {
         }
-        var token = new TypeToken<A<Integer>>() {};
-        var fieldType = token.resolveField(A.class.getDeclaredField("fieldA"));
-        assertEquals("List<List<Integer>>", fieldType.toString());
+        assertEquals(String.class, TypeToken.resolve(Box.class).getTypeParams().getFirst().getBaseTypeRaw());
+    }
+
+    @Test
+    public void testWildcards() {
+        var wildcardToken = new TypeToken<List<? extends CharSequence>>() {
+        };
+        assertEquals("List<? extends CharSequence>", wildcardToken.toString());
+        assertEquals("List<CharSequence>", TypeToken.reduceBounds(wildcardToken, false).toString());
+        class TypeA {
+        }
+        class TypeB<T> extends TypeA {
+        }
+        var wildcardToken2 = new TypeToken<List<? super TypeB<?>>>() {
+        };
+        assertEquals("List<? super TypeB<?>>", wildcardToken2.toString());
+        assertEquals("List<TypeA>", TypeToken.reduceBounds(wildcardToken2, true).toString());
+        assertEquals("List<Object>", TypeToken.reduceBounds(wildcardToken2, false).toString());
+        class TypeC extends TypeB<TypeA[]>  {}
+        var typeC = TypeToken.resolve(TypeC.class);
+        assertEquals("TypeB<TypeA[]>", typeC.resolveDirectParent().toString());
+        assertTrue(typeC.resolveDirectParent().getTypeParams().getFirst().isArray());
     }
 
     @Test
     @SneakyThrows
-    public void testResolveParent() {
-        interface Z<T3> {
+    public void testInfer() {
+        interface SuperType<D> {
         }
-        class A<T1, T2> implements Z<T2> {
-            T1 returns() {
+        class TypeA<T1, T2> {
+        }
+        class TypeB<E, D> extends TypeA<String, E> implements SuperType<D> {
+        }
+        class TypeC<A, C, D> extends TypeB<C, D> {
+            public C field;
+
+            public A produce() {
+                return null;
+            }
+            public List<? extends A> complexProduce(){
                 return null;
             }
         }
-        class B<T2> extends A<String, T2> {
-        }
-        class C extends B<Integer> {
-        }
-        var token = TypeToken.resolve(C.class);
-        System.out.println(token.inferType(Z.class));
+        var token = new TypeToken<TypeC<Double, Integer, Boolean>>() {
+        };
+        assertEquals("TypeA<String, Integer>", token.inferType(TypeA.class).toString());
+        assertEquals("TypeB<?, ?>", new TypeToken<TypeC<?, ?, ?>>() {
+        }.resolveDirectParent().toString());
+        assertEquals("SuperType<Boolean>", token.inferType(SuperType.class).toString());
+        var methodProduce = TypeC.class.getMethod("produce");
+        var fieldField = TypeC.class.getField("field");
+        assertEquals("Double", token.resolveReturnValue(methodProduce).toString());
+        assertEquals("Integer", token.resolveField(fieldField).toString());
+        var methodComplexProduce = TypeC.class.getMethod("complexProduce");
+        assertThrows(IllegalArgumentException.class, () -> token.resolveReturnValue(methodComplexProduce).toString());
     }
 
     @Test
-    public void testWildcard() {
-        var type = new TypeToken<List<? super List<? extends List<?>>>>() {
+    public void testToString() {
+        var token = new TypeToken<Map<String, Map<Map<String, String>, List<?>>>>() {
         };
-        System.out.println(type);
-        System.out.println(TypeToken.reduceBounds(type, true));
+        assertEquals("Map<String, Map<Map<String, String>, List<?>>>", token.toString());
     }
 }

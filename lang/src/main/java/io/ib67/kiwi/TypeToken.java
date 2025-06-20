@@ -76,7 +76,7 @@ public class TypeToken<C> {
      */
     public TypeToken(TypeToken<C> anotherToken) {
         this.baseTypeRaw = anotherToken.baseTypeRaw;
-        this.typeParams = anotherToken.typeParams;
+        this.typeParams = Arrays.copyOf(anotherToken.typeParams, anotherToken.typeParams.length);
         this.hashCode = anotherToken.hashCode();
         this.flags = anotherToken.flags;
     }
@@ -141,7 +141,8 @@ public class TypeToken<C> {
     @Contract("_, _ -> new")
     public static TypeToken<?> reduceBounds(TypeToken<?> type, boolean liftBySuper) {
         return switch (type.getWildcardKind()) {
-            case SUPER -> liftBySuper ? TypeToken.reduceBounds(type.typeParams[0], liftBySuper) : OBJECT;
+            case SUPER ->
+                    liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), liftBySuper) : OBJECT;
             case EXTENDS -> TypeToken.reduceBounds(type.typeParams[0], liftBySuper);
             case null -> {
                 var copiedToken = new TypeToken<>(type);
@@ -166,7 +167,7 @@ public class TypeToken<C> {
     }
 
     /**
-     * This method _creates_ TT from a type while {@link TypeToken#resolveTypeToken( Type)} resolves from
+     * This method _creates_ TT from a type while {@link TypeToken#resolveTypeToken(Type)} resolves from
      * TT subclass itself.
      */
     @SuppressWarnings("unchecked")
@@ -243,7 +244,11 @@ public class TypeToken<C> {
                     }
                 }
             }
-            default -> throw new IllegalStateException("Unsupported: " + typeParam);
+            case GenericArrayType arrayType -> {
+                resolveTypeToken(arrayType.getGenericComponentType());
+                flags |= MASK_ARRAY;
+            }
+            default -> throw new IllegalStateException("Unsupported: " + typeParam + " (" + typeParam.getClass() + ")");
         }
     }
 
@@ -269,14 +274,15 @@ public class TypeToken<C> {
 
     /**
      * Resolve a type in the context of current TypeToken.
-     * {@snippet lang=java :
+     * {@snippet lang = java:
      *         class A<T> {
      *             List<List<T>> fieldA;
      *         }
      *         var token = new TypeToken<A<Integer>>() {};
      *         var fieldType = token.resolveField(A.class.getDeclaredField("fieldA"));
      *         assertEquals("List<List<Integer>>", fieldType.toString());
-     * }
+     *}
+     *
      * @param type typeVar or class to be resolved.
      * @return typeToken
      */
@@ -297,18 +303,21 @@ public class TypeToken<C> {
             }
             return new TypeToken<>((Class<?>) parameterizedType.getRawType(), params);
         }
+        if (type instanceof WildcardType wildcardType) {
+            throw new IllegalArgumentException("Wildcard types are not supported for resolveType yet.");
+        }
         return new TypeToken<>(type);
     }
 
     /**
      * Resolve a generic type whose type parameters can be inferred from current type.
-     * {@snippet lang=java:
+     * {@snippet lang = java:
      *         class A<T1, T2> implements Z<T2> {}
      *         class B<T2> extends A<String, T2> {}
      *         class C extends B<Integer> {}
      *         var token = TypeToken.resolve(C.class);
      *         assertEquals("A<String,Integer>", token.inferType(A.class));
-     * }
+     *}
      */
     @NotNull
     @SuppressWarnings("unchecked")
@@ -321,13 +330,15 @@ public class TypeToken<C> {
         if (!clazz.isAssignableFrom(baseTypeRaw))
             throw new IllegalArgumentException("The base type of this TypeToken is not assignable to " + clazz);
         //todo superclass/interfaces is null if selfTypeRaw is a interface since interfaces doesn't extend Object
-        var path = new ArrayDeque<Type>(8);
+        Deque<Type> path = new ArrayDeque<Type>(8);
         var success = findPathToSuper(path, clazz.isInterface(), baseTypeRaw, clazz);
         if (!success) {
             throw new IllegalArgumentException("Cannot find a path in hierarchy tree to " + clazz);
         }
         TypeToken<?> token = this;
-        for (Type type : path.reversed()) {
+        path = path.reversed();
+        path.pop();
+        for (Type type : path) {
             token = token.resolveGenericParent(type);
         }
         return (TypeToken<? super C>) token;
@@ -343,21 +354,27 @@ public class TypeToken<C> {
             case ParameterizedType parameterizedType -> {
                 var clazz = (Class<? super C>) parameterizedType.getRawType();
                 var actualTypeArgs = parameterizedType.getActualTypeArguments();
-                var tokenParams = new Type[actualTypeArgs.length];
+                var tokenParams = new TypeToken[actualTypeArgs.length];
                 for (int i = 0; i < actualTypeArgs.length; i++) {
                     var actualTypeArg = actualTypeArgs[i];
-                    tokenParams[i] = actualTypeArg;
-                    if (actualTypeArg instanceof TypeVariable<?> typeVar) {
-                        // the token would not be a wildcard according to java specification
-                        // thus the baseTypeRaw is always present.
-                        tokenParams[i] = resolveType(typeVar).getBaseTypeRaw();
-                    }
+                    tokenParams[i] = resolveType(actualTypeArg);
                 }
-                yield TypeToken.getParameterized(clazz, tokenParams);
+                yield new TypeToken<>(clazz, tokenParams);
             }
             case Class<?> clz -> TypeToken.resolve(clz);
             default -> throw new IllegalStateException("Unexpected value: " + baseTypeRaw.getGenericSuperclass());
         };
+    }
+
+    @Nullable
+    public TypeToken<? super C> resolveDirectParent() {
+        if (this.isWildcard())
+            throw new IllegalArgumentException("Wildcard types are not supported for resolveType yet.");
+        if (baseTypeRaw == Object.class) return null;
+        if (this.baseTypeRaw.isInterface()) {
+            throw new IllegalArgumentException("Interfaces don't have superclasses.");
+        }
+        return resolveGenericParent(baseTypeRaw.getGenericSuperclass());
     }
 
     /**
@@ -449,13 +466,16 @@ public class TypeToken<C> {
                     for (int i = 0; i < typeParams.length; i++) {
                         sb.append(typeParams[i].toString());
                         if (i != typeParams.length - 1) {
-                            sb.append(',');
+                            sb.append(", ");
                         }
                     }
                     sb.append('>');
                 }
             }
         }
+        // generic array kind
+        if (!this.isWildcard() && !this.baseTypeRaw.isArray() && this.isArray())
+            sb.append("[]");
         return sb.toString();
     }
 

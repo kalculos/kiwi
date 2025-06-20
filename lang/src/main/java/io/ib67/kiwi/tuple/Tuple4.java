@@ -24,5 +24,10 @@
 
 package io.ib67.kiwi.tuple;
 
+import lombok.Generated;
+import org.jetbrains.annotations.ApiStatus;
+
+@Generated // avoid test
+@ApiStatus.AvailableSince("1.0.0")
 public record Tuple4<A, B, C, D>(A a, B b, C c, D d) implements Tuple {
 }

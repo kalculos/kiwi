@@ -24,6 +24,8 @@
 
 package io.ib67.kiwi.tuple;
 
+import lombok.Generated;
+
 import java.util.function.Consumer;
 
 public interface Tuple {

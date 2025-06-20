@@ -27,6 +27,7 @@ package io.ib67.kiwi.routine;
 import io.ib67.kiwi.closure.AnyConsumer;
 import io.ib67.kiwi.closure.AnySupplier;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.*;
@@ -42,16 +43,22 @@ public interface Uni<T> {
         return c -> {
             try {
                 c.onValue(supplier.get());
+            } catch (Interruption ignored) {
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         };
     }
 
-    static <T> Uni<T> ofAny(AnyConsumer<InterruptibleConsumer<T>> consumer) {
+    static <T> Uni<T> from(AnyConsumer<InterruptibleConsumer<T>> consumer) {
         return c -> {
             try {
                 consumer.consume(c);
+            } catch (Interruption ignored) {
+            } catch (RuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -147,18 +154,14 @@ public interface Uni<T> {
 
     default Uni<T> reduce(BinaryOperator<T> reducer) {
         return c -> {
-            var buffer = new Object[2];
+            var buffer = new Object[1];
             try {
                 accept(t -> {
                     if (buffer[0] == null) {
                         buffer[0] = t;
-                    } else if (buffer[1] == null) {
-                        buffer[1] = t;
-                    } else {
-                        buffer[0] = reducer.apply((T) buffer[0], (T) buffer[1]);
-                        buffer[1] = null;
+                    }else{
+                        buffer[0] = reducer.apply((T) buffer[0], t);
                     }
-
                 });
             } catch (Interruption ignored) {
             }
@@ -166,6 +169,7 @@ public interface Uni<T> {
         };
     }
 
+    @Nullable
     default T takeOne() {
         var objs = new Object[1];
         onItem(c -> {
