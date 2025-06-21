@@ -21,9 +21,3 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-dependencies {
-    implementation project(":lang")
-    testImplementation project(":lang")
-    testRuntimeOnly project(":lang")
-}

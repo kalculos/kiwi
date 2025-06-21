@@ -58,8 +58,8 @@ public class SortedArraySet<E> implements SortedSet<E> {
     public @NotNull SortedSet<E> subSet(E fromElement, E toElement) {
         return new SortedArraySet<>(
                 backingList.subList(
-                        binarySearch(backingList, fromElement, comparator),
-                        binarySearch(backingList, toElement, comparator)
+                        indexOfThrow(fromElement),
+                        indexOfThrow(toElement)
                 ), comparator
         );
     }
@@ -67,7 +67,7 @@ public class SortedArraySet<E> implements SortedSet<E> {
     @Override
     public @NotNull SortedSet<E> headSet(E toElement) {
         return new SortedArraySet<>(
-                backingList.subList(0, binarySearch(backingList, toElement, comparator)),
+                backingList.subList(0, indexOfThrow(toElement)),
                 comparator
         );
     }
@@ -75,9 +75,18 @@ public class SortedArraySet<E> implements SortedSet<E> {
     @Override
     public @NotNull SortedSet<E> tailSet(E fromElement) {
         return new SortedArraySet<>(
-                backingList.subList(binarySearch(backingList, fromElement, comparator), backingList.size()),
+                backingList.subList(indexOfThrow(fromElement), backingList.size()),
                 comparator
         );
+    }
+
+    protected int indexOfThrow(E element) {
+        Objects.requireNonNull(element, "element");
+        var index = binarySearch(backingList, element, comparator);
+        if(index < 0){
+            throw new NoSuchElementException(element.toString());
+        }
+        return index;
     }
 
     @Override
@@ -103,7 +112,7 @@ public class SortedArraySet<E> implements SortedSet<E> {
     @Override
     public boolean contains(Object o) {
         if (o == null) return false;
-        return binarySearch(backingList, (E) o, comparator) < 0;
+        return binarySearch(backingList, (E) o, comparator) >= 0;
     }
 
     @Override
@@ -135,7 +144,9 @@ public class SortedArraySet<E> implements SortedSet<E> {
                 continue;
             }
             backingList.add(i, e);
+            return true;
         }
+        backingList.add(e);
         return true;
     }
 
