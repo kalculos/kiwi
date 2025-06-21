@@ -22,6 +22,14 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'kiwi'
-include 'lang'
-include 'event'
+package io.ib67.kiwi.event.api;
+
+import io.ib67.kiwi.routine.Interruption;
+
+public interface EventHandler<E extends Event> {
+    void handle(E event) throws Interruption;
+
+    default int priority() {
+        return 0;
+    }
+}

@@ -22,6 +22,24 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'kiwi'
-include 'lang'
-include 'event'
+package io.ib67.kiwi.event.api;
+
+import io.ib67.kiwi.TypeToken;
+
+public interface EventBus {
+    /**
+     * Delivers an Event to all related subscribers.
+     *
+     * @param event event to be posted
+     * @return false if any handlers cancelled the event
+     */
+    boolean post(Event event);
+
+    /**
+     * Registers a {@link EventHandler} to receive events matching the typetoken.
+     * @param type
+     * @param handler
+     * @param <E>
+     */
+    <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler);
+}

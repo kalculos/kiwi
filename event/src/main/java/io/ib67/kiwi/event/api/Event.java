@@ -22,6 +22,19 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'kiwi'
-include 'lang'
-include 'event'
+package io.ib67.kiwi.event.api;
+
+import io.ib67.kiwi.TypeToken;
+import org.jetbrains.annotations.ApiStatus;
+
+/**
+ * An {@link Event}, with its properties, can be delivered to subscribers by posting itself on the EventBus.
+ */
+@ApiStatus.AvailableSince("0.1.0")
+public interface Event {
+    /**
+     * TypeToken of the Event. it may depend on some information gathered from an instance of Event.
+     * @return TypeToken of the Event.
+     */
+    TypeToken<?> type();
+}
