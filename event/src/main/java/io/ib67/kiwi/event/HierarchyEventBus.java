@@ -57,7 +57,7 @@ public class HierarchyEventBus implements EventBus {
         return true;
     }
 
-    protected SimpleEventBus createBus(TypeToken<?> type) {
+    SimpleEventBus createBus(TypeToken<?> type) {
         return new SimpleEventBus(4);
     }
 
