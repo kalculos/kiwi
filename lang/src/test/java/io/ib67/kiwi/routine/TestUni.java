@@ -25,11 +25,12 @@
 package io.ib67.kiwi.routine;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.ArrayList;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestUni {
     @Test
@@ -163,10 +164,10 @@ class TestUni {
     }
 
     @Test
-    void testUniq(){
+    void testUniq() {
         Uni<Integer> uni = c -> {
             int i = 0;
-            while(true){
+            while (true) {
                 c.onValue(i++);
                 c.onValue(i);
             }
@@ -174,17 +175,37 @@ class TestUni {
         // sum [0 to 4]
         assertEquals(10, uni.unique().limit(5).reduce(Integer::sum).takeOne());
     }
+
     @Test
-    void testMultiMap(){
-        Uni<Integer> uni = c -> {
-            int i = 0;
-            while(true){
-                c.onValue(i++);
-            }
-        };
-        uni.<Integer>multiMap((i, sink) -> {
+    void testMultiMap() {
+        Uni.infiniteAscendingNum().<Integer>multiMap((i, sink) -> {
             sink.onValue(i);
             sink.onValue(i);
         }).limit(2).onItem(value -> assertEquals(0, value));
+    }
+
+    @Test
+    void testForFirst() {
+        Uni.infiniteAscendingNum()
+                .forFirst(it -> it + 1)
+                .limit(2).onItem(value -> assertEquals(1, value));
+
+    }
+
+    @Test
+    void testOnce() {
+        var uni = Uni.infiniteAscendingNum()
+                .once()
+                .filter(it -> it % 2 == 0).limit(2);
+        uni.onItem(it -> {
+        });
+        assertThrows(IllegalStateException.class, () -> uni.onItem(System.out::println));
+    }
+
+    @Test
+    void testThen() {
+        var uni = Uni.of(1)
+                .then(it -> null);
+        assertNull(uni);
     }
 }

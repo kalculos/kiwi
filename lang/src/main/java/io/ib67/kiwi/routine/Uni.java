@@ -29,10 +29,8 @@ import io.ib67.kiwi.closure.AnySupplier;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.BitSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -68,6 +66,15 @@ public interface Uni<T> {
         };
     }
 
+    static Uni<Integer> infiniteAscendingNum() {
+        return c -> {
+            var number = 0;
+            while (true) {
+                c.onValue(number++);
+            }
+        };
+    }
+
     /**
      * This method is meant to be implemented by Uni instances.
      * For uni's consumers, use {@link Uni#onItem(InterruptibleConsumer)} instead.
@@ -82,15 +89,27 @@ public interface Uni<T> {
         }
     }
 
-    default <M> Uni<M> map(Function<T, M> mapper) {
+    default <M> Uni<M> map(Function<? super T, M> mapper) {
         return c -> accept(t -> c.onValue(mapper.apply(t)));
     }
 
-    default <M> Uni<M> flatMap(Function<T, Uni<M>> mapper) {
+    default Uni<T> forFirst(UnaryOperator<T> mapper) { //todo test
+        var isFirst = new boolean[]{true};
+        return c -> accept(t -> {
+            if (isFirst[0]) {
+                c.onValue(mapper.apply(t));
+                isFirst[0] = false;
+            } else {
+                c.onValue(t);
+            }
+        });
+    }
+
+    default <M> Uni<M> flatMap(Function<? super T, Uni<M>> mapper) {
         return c -> accept(t -> mapper.apply(t).accept(c));
     }
 
-    default Uni<T> filter(Predicate<T> predicate) {
+    default Uni<T> filter(Predicate<? super T> predicate) {
         return c -> accept(t -> {
             if (predicate.test(t)) {
                 c.onValue(t);
@@ -103,7 +122,7 @@ public interface Uni<T> {
         return filter(set::add);
     }
 
-    default <M> Uni<M> multiMap(InterruptibleBiConsumer<T, InterruptibleConsumer<M>> mapper) {
+    default <M> Uni<M> multiMap(InterruptibleBiConsumer<? super T, ? super InterruptibleConsumer<M>> mapper) {
         return c -> accept(t -> mapper.onValue(t, c));
     }
 
@@ -128,7 +147,7 @@ public interface Uni<T> {
         });
     }
 
-    default boolean any(Predicate<T> predicate) {
+    default boolean any(Predicate<? super T> predicate) {
         var hasAny = new boolean[]{false};
         try {
             accept(it -> {
@@ -142,7 +161,7 @@ public interface Uni<T> {
         return hasAny[0];
     }
 
-    default boolean all(Predicate<T> predicate) {
+    default boolean all(Predicate<? super T> predicate) {
         var hasAll = new boolean[]{true};
         try {
             accept(it -> {
@@ -156,11 +175,11 @@ public interface Uni<T> {
         return hasAll[0];
     }
 
-    default boolean none(Predicate<T> predicate) {
+    default boolean none(Predicate<? super T> predicate) {
         return !all(predicate);
     }
 
-    default Uni<T> reduce(BinaryOperator<T> reducer) {
+    default Uni<T> reduce(BinaryOperator<? super T> reducer) {
         return c -> {
             var buffer = new Object[1];
             try {
@@ -177,6 +196,18 @@ public interface Uni<T> {
         };
     }
 
+    default Uni<T> reduce(T identity, BinaryOperator<? super T> reducer) {
+        return c -> {
+            var result = new Object[]{identity};
+            try {
+                accept(t -> result[0] = reducer.apply((T) result[0], t));
+            }catch (Interruption ignored) {
+
+            }
+            c.onValue((T) result[0]);
+        };
+    }
+
     @Nullable
     default T takeOne() {
         var objs = new Object[1];
@@ -187,7 +218,7 @@ public interface Uni<T> {
         return (T) objs[0];
     }
 
-    default <A, R> R collect(Collector<T, A, R> collector) {
+    default <A, R> R collect(Collector<? super T, A, R> collector) { //todo 补充泛型
         A container = collector.supplier().get();
         onItem(t -> collector.accumulator().accept(container, t));
         return collector.finisher().apply(container);
@@ -195,6 +226,21 @@ public interface Uni<T> {
 
     default List<T> toList() {
         return collect(Collectors.toUnmodifiableList());
+    }
+
+    default Uni<T> then(UnaryOperator<Uni<T>> operator) {
+        return operator.apply(this);
+    }
+
+    default Uni<T> once() {
+        var executed = new boolean[]{false};
+        return c -> {
+            if (executed[0]) {
+                throw new IllegalStateException("This uni can be only executed once");
+            }
+            executed[0] = true;
+            accept(c);
+        };
     }
 
     @FunctionalInterface
@@ -218,19 +264,21 @@ public interface Uni<T> {
     }
 
     @FunctionalInterface
-    interface InterruptibleBiConsumer<A,B> extends BiConsumer<A,B> {
+    interface InterruptibleBiConsumer<A, B> extends BiConsumer<A, B> {
 
         /**
          * Also see {@link InterruptibleConsumer#accept(InterruptibleConsumer)}
+         *
          * @param a the first input argument
          * @param b the second input argument
          */
         @Override
         @Deprecated
-        default void accept(A a, B b){
-            try{
-                onValue(a,b);
-            }catch (Interruption ignored){}
+        default void accept(A a, B b) {
+            try {
+                onValue(a, b);
+            } catch (Interruption ignored) {
+            }
         }
 
         void onValue(A a, B b) throws Interruption;

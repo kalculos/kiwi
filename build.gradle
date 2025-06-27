@@ -75,3 +75,17 @@ subprojects {
         withSourcesJar()
     }
 }
+
+publishing {
+    repositories {
+        maven {
+            name = "Kalculos"
+            url = "https://repo.sfclub.cc/"
+        }
+    }
+    publications {
+        lang(MavenPublication){
+            artifactId = 'lang'
+        }
+    }
+}

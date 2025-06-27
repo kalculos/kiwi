@@ -24,6 +24,8 @@
 
 package io.ib67.kiwi.reflection;
 
+import lombok.SneakyThrows;
+
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -31,11 +33,8 @@ import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.Objects;
 
-/**
- * @author IzzelAliz
- */
-@SuppressWarnings("all")
 
+@SuppressWarnings("all")
 public class Unsafe {
 
     private static final sun.misc.Unsafe unsafe;
@@ -79,6 +78,12 @@ public class Unsafe {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    @SneakyThrows
+    public static <T> T getObject(Object object, String fieldName) {
+        var offset = Unsafe.objectFieldOffset(object.getClass().getDeclaredField(fieldName));
+        return (T) Unsafe.getObject(object, offset);
     }
 
     public static MethodHandles.Lookup lookup() {

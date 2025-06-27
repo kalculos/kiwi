@@ -24,11 +24,10 @@
 
 package io.ib67.kiwi;
 
+import io.ib67.kiwi.routine.Uni;
 import lombok.experimental.UtilityClass;
-import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Collection;
-import java.util.List;
+import java.security.SecureRandom;
 import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
@@ -64,5 +63,18 @@ public final class RandomHelper {
             sb.append((char) number(65, 65 + 57));
         }
         return sb.toString();
+    }
+
+    public static Uni<Integer> randomInt() {
+        return c -> {
+            while (true) c.onValue(number());
+        };
+    }
+
+    public static Uni<Integer> safeRandomInt() {
+        var rand = new SecureRandom();
+        return c -> {
+            while (true) c.onValue(rand.nextInt());
+        };
     }
 }
