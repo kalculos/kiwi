@@ -34,23 +34,17 @@ import io.ib67.kiwi.routine.Interruption;
 import java.util.Comparator;
 import java.util.SortedSet;
 
-import static java.util.Objects.requireNonNull;
-
-public class SingleTypedEventBus implements EventBus {
-    protected final TypeToken<?> type;
+class SimpleEventBus implements EventBus {
     protected final SortedSet<EventHandler> handlers;
 
-    public SingleTypedEventBus(TypeToken<?> type, int initialCapacity) {
-        this.type = requireNonNull(type);
+    public SimpleEventBus(int initialCapacity) {
         this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(EventHandler::priority));
     }
 
     @Override
     public boolean post(Event event) {
-        if (!type.equals(event.type())) {
-            throw new IllegalArgumentException("Event type mismatch");
-        }
         try {
+            var handlers = this.handlers;
             for (var handler : handlers) {
                 handler.handle(event);
             }
@@ -62,9 +56,6 @@ public class SingleTypedEventBus implements EventBus {
 
     @Override
     public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
-        if (!this.type.equals(type)) {
-            throw new IllegalArgumentException("Event type mismatch");
-        }
         handlers.add(handler);
     }
 }

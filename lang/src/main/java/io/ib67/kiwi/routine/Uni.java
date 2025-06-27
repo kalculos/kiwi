@@ -53,6 +53,15 @@ public interface Uni<T> {
         };
     }
 
+    @SafeVarargs
+    static <T> Uni<T> of(T... values) {
+        return c -> {
+            for (T value : values) {
+                c.onValue(value);
+            }
+        };
+    }
+
     static <T> Uni<T> from(AnyConsumer<InterruptibleConsumer<T>> consumer) {
         return c -> {
             try {
@@ -201,9 +210,7 @@ public interface Uni<T> {
             var result = new Object[]{identity};
             try {
                 accept(t -> result[0] = reducer.apply((T) result[0], t));
-            }catch (Interruption ignored) {
-
-            }
+            } catch (Interruption ignored) {}
             c.onValue((T) result[0]);
         };
     }

@@ -24,27 +24,20 @@
 
 package io.ib67.kiwi.event.api;
 
-import io.ib67.kiwi.TypeToken;
-import io.ib67.kiwi.routine.Uni;
+import io.ib67.kiwi.event.util.AsmReflectionListenerResolver;
+import io.ib67.kiwi.event.util.EventTuple;
+import lombok.SneakyThrows;
 
-public interface EventBus {
-    /**
-     * Delivers an Event to all related subscribers.
-     *
-     * @param event event to be posted
-     * @return false if any handlers cancelled the event
-     */
-    boolean post(Event event);
+import java.lang.invoke.MethodHandles;
 
-    /**
-     * Registers a {@link EventHandler} to receive events matching the typetoken.
-     * @param type
-     * @param handler
-     * @param <E>
-     */
-    <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler);
-
-    default <E extends Event> Uni<E> register(TypeToken<E> type) {
-        return c -> register(type, c::onValue);
+public interface EventListenerHost {
+    @SneakyThrows
+    default void registerTo(EventBus bus) {
+        var lookup = MethodHandles.privateLookupIn(this.getClass(), MethodHandles.lookup());
+        var handlers = new AsmReflectionListenerResolver(lookup, this).resolveHandlers();
+        handlers.forEach(t -> {
+            var _t = (EventTuple<Event>) t;
+            bus.register(_t.type(), _t.handler());
+        });
     }
 }

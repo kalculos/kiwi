@@ -21,9 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+plugins {
+    id "me.champeau.jmh" version "0.7.3"
+}
+
+jmh {
+    profilers = ['jfr:dir=profile-results']
+    fork = 2
+    iterations = 3
+    def fastDebugJdk = System.getProperty("FASTDEBUG_JDK_HOME", "/home/icybear/fastdebug/jdk/bin/java")
+    if (System.getProperty("fastdebug") != null) {
+        println("fastdebug mode")
+        jvm = fastDebugJdk
+        jvmArgsPrepend = ["-fastdebug"]
+        jvmArgsAppend = ["-XX:+UnlockDiagnosticVMOptions",
+                         "-XX:+PrintAssembly",
+                         "-XX:LogFile=jitlog.log",
+                         "-XX:+DebugNonSafepoints",
+                         "-Xlog:class+load=info",
+                         "-XX:+LogCompilation"]
+        fork = 1
+    }
+    if (System.getProperty("perfasm") != null) {
+        println("perfasm mode")
+        jvm = fastDebugJdk
+        profilers = ["perfasm:intelSyntax=true;tooBigThreshold=1500;top=3"]
+        jvmArgsAppend = [
+                "-XX:+UnlockDiagnosticVMOptions",
+                "-XX:+PrintAssembly",
+                "-XX:+PrintNMethods ",
+                "-XX:+PrintNativeNMethods",
+                "-XX:+PrintSignatureHandlers",
+                "-XX:+PrintAdapterHandlers",
+                "-XX:+PrintStubCode",
+                "-XX:+LogCompilation",
+                "-XX:LogFile=hotspot.log"]
+    }
+}
+
+java {
+    withSourcesJar()
+}
 
 dependencies {
-    implementation project(":lang")
-    testImplementation project(":lang")
+    implementation 'org.ow2.asm:asm:9.8'
+    api project(":lang")
     testRuntimeOnly project(":lang")
 }

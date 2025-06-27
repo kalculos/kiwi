@@ -29,6 +29,8 @@ import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
 
+import java.lang.reflect.Type;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,7 +40,7 @@ public class HierarchyEventBus implements EventBus {
 
     protected final Map<TypeToken<?>, ChainedBus> busses = new HashMap<>();
 
-    public HierarchyEventBus(){
+    public HierarchyEventBus() {
         var eventType = TypeToken.resolve(Event.class);
         busses.put(eventType, new ChainedBus(createBus(eventType), null));
     }
@@ -55,17 +57,23 @@ public class HierarchyEventBus implements EventBus {
         return true;
     }
 
-    protected SingleTypedEventBus createBus(TypeToken<?> type) {
-        return new SingleTypedEventBus(type, 4);
+    protected SimpleEventBus createBus(TypeToken<?> type) {
+        return new SimpleEventBus(4);
     }
 
-    protected ChainedBus locateBusOrCreate(TypeToken<?> type) {
-        return busses.computeIfAbsent(type, t -> new ChainedBus(createBus(t), locateBusOrCreate(t.resolveDirectParent())));
+    protected ChainedBus locateBusOrCreate(Deque<Type> deque, TypeToken<?> typeToken) {
+        var chain = busses.get(typeToken);
+        if (chain != null) {
+            return chain;
+        }
+        chain = new ChainedBus(createBus(typeToken), locateBusOrCreate(deque, TypeToken.resolve(deque.pop())));
+        busses.put(typeToken, chain);
+        return chain;
     }
 
     @Override
     public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
-        var bus = locateBusOrCreate(type);
+        var bus = locateBusOrCreate(type.pathToSuper(true, Event.class), type);
         bus.bus().register(type, handler);
     }
 }

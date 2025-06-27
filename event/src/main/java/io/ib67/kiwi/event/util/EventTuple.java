@@ -22,29 +22,13 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.event.api;
+package io.ib67.kiwi.event.util;
 
 import io.ib67.kiwi.TypeToken;
-import io.ib67.kiwi.routine.Uni;
+import io.ib67.kiwi.event.api.Event;
+import io.ib67.kiwi.event.api.EventHandler;
 
-public interface EventBus {
-    /**
-     * Delivers an Event to all related subscribers.
-     *
-     * @param event event to be posted
-     * @return false if any handlers cancelled the event
-     */
-    boolean post(Event event);
-
-    /**
-     * Registers a {@link EventHandler} to receive events matching the typetoken.
-     * @param type
-     * @param handler
-     * @param <E>
-     */
-    <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler);
-
-    default <E extends Event> Uni<E> register(TypeToken<E> type) {
-        return c -> register(type, c::onValue);
-    }
+public record EventTuple<E extends Event>(
+        TypeToken<E> type, EventHandler<E> handler
+) {
 }

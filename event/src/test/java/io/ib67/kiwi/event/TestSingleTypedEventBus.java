@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestSingleTypedEventBus {
-    private SingleTypedEventBus eventBus;
+    private SimpleEventBus eventBus;
     private TypeToken<TestEvent> eventType;
 
     static class TestEvent implements Event {
@@ -59,7 +59,7 @@ class TestSingleTypedEventBus {
     @BeforeEach
     void setUp() {
         eventType = TypeToken.resolve(TestEvent.class);
-        eventBus = new SingleTypedEventBus(eventType, 4);
+        eventBus = new SimpleEventBus(4);
     }
 
     @Test
@@ -69,16 +69,6 @@ class TestSingleTypedEventBus {
 
         assertTrue(eventBus.post(event));
         assertTrue(event.handled);
-    }
-
-    @Test
-    void testEventTypeMismatch() {
-        TypeToken<TestInterruptingEvent> wrongType = TypeToken.resolve(TestInterruptingEvent.class);
-        TestInterruptingEvent wrongEvent = new TestInterruptingEvent();
-
-        assertThrows(IllegalArgumentException.class, () -> eventBus.post(wrongEvent));
-        assertThrows(IllegalArgumentException.class,
-                () -> eventBus.register(wrongType, e -> {}));
     }
 
     @Test

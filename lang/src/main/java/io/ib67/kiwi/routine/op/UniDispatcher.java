@@ -22,29 +22,39 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.event.api;
+package io.ib67.kiwi.routine.op;
 
-import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.routine.Uni;
 
-public interface EventBus {
-    /**
-     * Delivers an Event to all related subscribers.
-     *
-     * @param event event to be posted
-     * @return false if any handlers cancelled the event
-     */
-    boolean post(Event event);
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
-    /**
-     * Registers a {@link EventHandler} to receive events matching the typetoken.
-     * @param type
-     * @param handler
-     * @param <E>
-     */
-    <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler);
+public class UniDispatcher<T> {
+    private final Map<Predicate<T>, Uni.InterruptibleConsumer<T>> map = new HashMap<>();
+    private UniDispatcher() {
+    }
 
-    default <E extends Event> Uni<E> register(TypeToken<E> type) {
-        return c -> register(type, c::onValue);
+    public static <T> UniDispatcher<T> of() {
+        return new UniDispatcher<>();
+    }
+
+    public UniDispatcher<T> add(Predicate<T> predicate, Uni.InterruptibleConsumer<T> consumer){
+        map.put(predicate, consumer);
+        return this;
+    }
+
+    public UnaryOperator<Uni<T>> build(){
+        var finalMap = Map.copyOf(map);
+        return u -> c -> u.accept(t->{
+            for (var entry : finalMap.entrySet()) {
+                if(entry.getKey().test(t)){
+                    entry.getValue().onValue(t);
+                    return;
+                }
+            }
+            c.onValue(t);
+        });
     }
 }

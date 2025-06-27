@@ -95,18 +95,19 @@ class TestHierarchyEventBus {
     void testInterruptionPropagation() {
         TypeToken<ParentEvent> parentType = TypeToken.resolve(ParentEvent.class);
         TypeToken<ChildEvent> childType = TypeToken.resolve(ChildEvent.class);
-
+        boolean[] parentHandlerCalled = {false};
         eventBus.register(parentType, event -> {
+            parentHandlerCalled[0] = true;
+        });
+
+        eventBus.register(childType, event ->
+        {
             throw Interruption.INTERRUPTION;
         });
 
-        boolean[] childHandlerCalled = {false};
-        eventBus.register(childType, event ->
-                childHandlerCalled[0] = true);
-
         ChildEvent childEvent = new ChildEvent();
         assertFalse(eventBus.post(childEvent));
-        assertFalse(childHandlerCalled[0]);
+        assertFalse(parentHandlerCalled[0]);
     }
 
     @Test
@@ -143,7 +144,7 @@ class TestHierarchyEventBus {
 
         ParentEvent event = new ParentEvent();
         assertTrue(eventBus.post(event));
-        assertEquals("21", order.toString());
+        assertEquals("12", order.toString());
     }
 
     @Test

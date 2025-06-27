@@ -347,7 +347,7 @@ public class TypeToken<C> {
         path = path.reversed();
         path.pop();
         for (Type type : path) {
-            token = token.resolveGenericParent(type);
+            token = token.resolveDirectGenericParent(type);
         }
         return (TypeToken<? super C>) token;
     }
@@ -357,7 +357,7 @@ public class TypeToken<C> {
      * for most use-cases, see {@link TypeToken#inferType (Class)}
      */
     @SuppressWarnings("unchecked")
-    private TypeToken<? super C> resolveGenericParent(Type type) {
+    public TypeToken<? super C> resolveDirectGenericParent(Type type) {
         Objects.requireNonNull(type);
         return switch (type) {
             case ParameterizedType parameterizedType -> {
@@ -383,7 +383,13 @@ public class TypeToken<C> {
         if (this.baseTypeRaw.isInterface()) {
             throw new IllegalArgumentException("Interfaces don't have superclasses.");
         }
-        return resolveGenericParent(baseTypeRaw.getGenericSuperclass());
+        return resolveDirectGenericParent(baseTypeRaw.getGenericSuperclass());
+    }
+
+    public Deque<Type> pathToSuper(boolean findInterface, Class<?> clazz) {
+        var deque = new ArrayDeque<Type>();
+        findPathToSuper(deque, findInterface, this.baseTypeRaw, clazz);
+        return deque.reversed();
     }
 
     /**
@@ -397,7 +403,7 @@ public class TypeToken<C> {
      * @return succeed or not
      */
     protected static boolean findPathToSuper(Deque<Type> typeDeque, boolean findInterface, Type type, Class<?> clazz) {
-        if (clazz.getTypeParameters().length == 0) throw new IllegalArgumentException("clazz must be generic");
+//        if (clazz.getTypeParameters().length == 0) throw new IllegalArgumentException("clazz must be generic");
         typeDeque.push(type);
         Class<?> clz;
         if (type instanceof ParameterizedType parameterizedType) {
