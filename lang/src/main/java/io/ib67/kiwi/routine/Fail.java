@@ -26,13 +26,17 @@ package io.ib67.kiwi.routine;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Consumer;
-
 public record Fail<T>(Object failure) implements Result<T> {
-    private static final Fail<?> NONE = new Fail<>(null);
+    public static class Nothing {
+        public static final Nothing NOTHING = new Nothing();
+        private Nothing() {
+        }
+    }
+
+    private static final Fail<Nothing> NONE = new Fail<>(Nothing.NOTHING);
 
     @SuppressWarnings("unchecked")
-    public static <T> Fail<T> none(){
+    public static <T> Fail<T> none() {
         return (Fail<T>) NONE;
     }
 

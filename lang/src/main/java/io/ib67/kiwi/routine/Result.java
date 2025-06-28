@@ -29,6 +29,9 @@ import io.ib67.kiwi.closure.AnySupplier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public sealed interface Result<T> extends Uni<T> permits Fail, Some {
@@ -40,8 +43,18 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
         }
     }
 
-    static Result<? extends @Nullable Object> runAny(AnyRunnable runnable) {
+    static <T> Result<T> fromNotNull(AnySupplier<T> supplier) {
         try{
+            var r = supplier.get();
+            if(r == null) return Fail.none();
+            return new Some<>(r);
+        }catch (Exception e){
+            return Fail.of(e);
+        }
+    }
+
+    static Result<? extends @Nullable Object> runAny(AnyRunnable runnable) {
+        try {
             runnable.run();
             return new Some<>(null);
         } catch (Exception e) {
@@ -82,8 +95,37 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
         };
     }
 
+    default Result<T> onFail(Consumer<Fail<?>> failConsumer) {
+        if (this instanceof Fail) {
+            failConsumer.accept((Fail) this);
+        }
+        return this;
+    }
+
     default Optional<T> toOptional() {
         return Optional.ofNullable(result());
+    }
+
+    @Override
+    default Result<T> filter(Predicate<? super T> predicate) {
+        if(this instanceof Fail) {
+            return this;
+        }else if(this instanceof Some(T t)){
+            if(predicate.test(t)){
+                return this;
+            }
+        }
+        return Fail.none();
+    }
+
+    @Override
+    default <M> Result<M> map(Function<? super T, M> mapper) {
+        if(this instanceof Fail f) {
+            return f;
+        }else if(this instanceof Some(T t)){
+            return new Some<>(mapper.apply(t));
+        }
+        throw new IllegalStateException("Impossible");
     }
 
     T result();

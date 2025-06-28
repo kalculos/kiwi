@@ -33,28 +33,41 @@ import java.lang.reflect.Type;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class HierarchyEventBus implements EventBus {
     protected record ChainedBus(EventBus bus, ChainedBus parent) {
     }
 
     protected final Map<TypeToken<?>, ChainedBus> busses = new HashMap<>();
+    protected final Lock readLock;
+    protected final Lock writeLock;
 
     public HierarchyEventBus() {
         var eventType = TypeToken.resolve(Event.class);
+        var lock = new ReentrantReadWriteLock();
+        readLock = lock.readLock();
+        writeLock = lock.writeLock();
+
         busses.put(eventType, new ChainedBus(createBus(eventType), null));
     }
 
     @Override
     public boolean post(Event event) {
-        var chain = busses.get(event.type());
-        while (chain != null) {
-            if (!chain.bus.post(event)) {
-                return false;
+        readLock.lock();
+        try {
+            var chain = busses.get(event.type());
+            while (chain != null) {
+                if (!chain.bus.post(event)) {
+                    return false;
+                }
+                chain = chain.parent;
             }
-            chain = chain.parent;
+            return true;
+        }finally {
+            readLock.unlock();
         }
-        return true;
     }
 
     SimpleEventBus createBus(TypeToken<?> type) {
@@ -73,7 +86,12 @@ public class HierarchyEventBus implements EventBus {
 
     @Override
     public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
-        var bus = locateBusOrCreate(type.pathToSuper(true, Event.class), type);
-        bus.bus().register(type, handler);
+        writeLock.lock();
+        try{
+            var bus = locateBusOrCreate(type.pathToSuper(true, Event.class), type);
+            bus.bus().register(type, handler);
+        }finally {
+            writeLock.unlock();
+        }
     }
 }

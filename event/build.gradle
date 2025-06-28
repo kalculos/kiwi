@@ -29,8 +29,8 @@ jmh {
     profilers = ['jfr:dir=profile-results']
     fork = 2
     iterations = 3
-    def fastDebugJdk = System.getProperty("FASTDEBUG_JDK_HOME", "/home/icybear/fastdebug/jdk/bin/java")
-    if (System.getProperty("fastdebug") != null) {
+    def fastDebugJdk = System.getProperty("FASTDEBUG_JDK_HOME", "/home/icybear/fastdebug/jdk") + "/bin/java"
+    if (System.getProperty("fastdebug") != null) {bin/java
         println("fastdebug mode")
         jvm = fastDebugJdk
         jvmArgsPrepend = ["-fastdebug"]

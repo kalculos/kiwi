@@ -44,6 +44,10 @@ public interface EventBus {
      */
     <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler);
 
+    default <E extends Event> void register(Class<E> type, EventHandler<E> handler) {
+        register(TypeToken.resolve(type), handler);
+    }
+
     default <E extends Event> Uni<E> register(TypeToken<E> type) {
         return c -> register(type, c::onValue);
     }

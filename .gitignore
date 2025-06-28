@@ -3,3 +3,4 @@
 build/
 **/profile-results/**
 *.log
+.attach_pid*

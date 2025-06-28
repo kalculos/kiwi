@@ -40,11 +40,11 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class AsmReflectionListenerResolver extends ReflectionListenerResolver implements Opcodes {
+public class AsmListenerResolver extends ReflectionListenerResolver implements Opcodes {
     protected static final String DUMP_PATH = System.getProperty("kiwi.event.asmdumpdir", null);
     protected static final AtomicInteger CLASS_COUNTER = new AtomicInteger();
 
-    public AsmReflectionListenerResolver(MethodHandles.Lookup lookup, EventListenerHost host) {
+    public AsmListenerResolver(MethodHandles.Lookup lookup, EventListenerHost host) {
         super(lookup, host);
     }
 

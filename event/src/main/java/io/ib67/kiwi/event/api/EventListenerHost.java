@@ -24,7 +24,7 @@
 
 package io.ib67.kiwi.event.api;
 
-import io.ib67.kiwi.event.util.AsmReflectionListenerResolver;
+import io.ib67.kiwi.event.util.AsmListenerResolver;
 import io.ib67.kiwi.event.util.EventTuple;
 import lombok.SneakyThrows;
 
@@ -34,7 +34,7 @@ public interface EventListenerHost {
     @SneakyThrows
     default void registerTo(EventBus bus) {
         var lookup = MethodHandles.privateLookupIn(this.getClass(), MethodHandles.lookup());
-        var handlers = new AsmReflectionListenerResolver(lookup, this).resolveHandlers();
+        var handlers = new AsmListenerResolver(lookup, this).resolveHandlers();
         handlers.forEach(t -> {
             var _t = (EventTuple<Event>) t;
             bus.register(_t.type(), _t.handler());

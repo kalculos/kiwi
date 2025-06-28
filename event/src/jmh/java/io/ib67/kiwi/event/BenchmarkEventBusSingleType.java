@@ -30,7 +30,7 @@ import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
 import io.ib67.kiwi.event.api.EventListenerHost;
 import io.ib67.kiwi.event.api.annotation.SubscribeEvent;
-import io.ib67.kiwi.event.util.AsmReflectionListenerResolver;
+import io.ib67.kiwi.event.util.AsmListenerResolver;
 import io.ib67.kiwi.event.util.EventTuple;
 import io.ib67.kiwi.event.util.ReflectionListenerResolver;
 import io.ib67.kiwi.routine.Interruption;
@@ -84,7 +84,7 @@ public class BenchmarkEventBusSingleType {
             /*
              * Duplicate multiple handlers to avoid inlining. Especially for codegen resolver
              */
-            var handlersGen = new AsmReflectionListenerResolver(lookup, listenerHost).resolveHandlers();
+            var handlersGen = new AsmListenerResolver(lookup, listenerHost).resolveHandlers();
             var handlersMH = new ReflectionListenerResolver(lookup, listenerHost).resolveHandlers();
             ((EventHandler<TestEventA>) handlersGen.getFirst().handler()).handle(event);
             ((EventHandler<TestEventA>) handlersMH.getFirst().handler()).handle(event); // preload method handle
@@ -94,7 +94,7 @@ public class BenchmarkEventBusSingleType {
             }
             for (var _entry : handlersMH) {
                 var entry = (EventTuple<Event>) _entry;
-                busRuntimeGen.register(entry.type(), entry.handler());
+                busMethodHandle.register(entry.type(), entry.handler());
             }
         }
     }

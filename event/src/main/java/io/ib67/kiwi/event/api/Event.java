@@ -26,15 +26,24 @@ package io.ib67.kiwi.event.api;
 
 import io.ib67.kiwi.TypeToken;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An {@link Event}, with its properties, can be delivered to subscribers by posting itself on the EventBus.
  */
 @ApiStatus.AvailableSince("0.1.0")
 public interface Event {
+    ClassValue<TypeToken<?>> RAW_TOKENS = new ClassValue<>() {
+        @Override
+        protected TypeToken<?> computeValue(@NotNull Class<?> type) {
+            return TypeToken.resolve(type);
+        }
+    };
     /**
      * TypeToken of the Event. it may depend on some information gathered from an instance of Event.
      * @return TypeToken of the Event.
      */
-    TypeToken<?> type();
+    default TypeToken<?> type(){
+        return RAW_TOKENS.get(this.getClass());
+    }
 }

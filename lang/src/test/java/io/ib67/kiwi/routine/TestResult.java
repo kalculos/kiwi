@@ -42,6 +42,9 @@ public class TestResult {
         Fail.none().accept(it -> {
             throw new IllegalStateException("Should not invoke the handler");
         });
+        var failCalled = new boolean[]{false};
+        Fail.none().onFail(fail -> failCalled[0] = true);
+        assertTrue(failCalled[0]);
         result.onItem(it -> assertEquals("hello", it));
         assertEquals("hello", result.orElse("abcd"));
         assertEquals("hello", result.orElseGet(() -> "abcd"));
@@ -68,6 +71,5 @@ public class TestResult {
         assertInstanceOf(Fail.class, Result.runAny(() -> {
             throw new IOException("hello");
         }));
-        
     }
 }

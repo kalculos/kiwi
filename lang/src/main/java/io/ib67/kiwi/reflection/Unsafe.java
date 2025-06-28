@@ -25,6 +25,7 @@
 package io.ib67.kiwi.reflection;
 
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -35,6 +36,7 @@ import java.util.Objects;
 
 
 @SuppressWarnings("all")
+@ApiStatus.Experimental
 public class Unsafe {
 
     private static final sun.misc.Unsafe unsafe;

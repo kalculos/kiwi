@@ -44,7 +44,7 @@ class TestListenerResolver implements Opcodes {
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         var called = new AtomicBoolean(false);
         EventListenerHost host = new TestListener(called);
-        var handler = new AsmReflectionListenerResolver(lookup, host).resolveHandlers().getFirst().handler();
+        var handler = new AsmListenerResolver(lookup, host).resolveHandlers().getFirst().handler();
         assertNotNull(handler);
         handler.handle(null);
         assertTrue(called.get());
