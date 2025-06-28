@@ -38,6 +38,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * An utilities that generates MethodHandle handlers for each subscriber methof from subclasses of {@link EventListenerHost}
+ */
 public class ReflectionListenerResolver {
     protected final EventListenerHost host;
     protected final MethodHandles.Lookup lookup;

@@ -26,6 +26,10 @@ package io.ib67.kiwi.event.api.annotation;
 
 import java.lang.annotation.*;
 
+/**
+ * Annotates a method to be a {@link io.ib67.kiwi.event.api.EventHandler}. The declaring class of the method must be a {@link io.ib67.kiwi.event.api.EventListenerHost}
+ * See also: {@link io.ib67.kiwi.event.util.AsmListenerResolver} and {@link io.ib67.kiwi.event.util.ReflectionListenerResolver}
+ */
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

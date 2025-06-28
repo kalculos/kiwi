@@ -30,7 +30,14 @@ import lombok.SneakyThrows;
 
 import java.lang.invoke.MethodHandles;
 
+/**
+ * Just a mark of classes that contain multiple methods annotated with {@link io.ib67.kiwi.event.api.annotation.SubscribeEvent}s.
+ */
 public interface EventListenerHost {
+    /**
+     * A utility method to register all handler methods to a bus.
+     * @param bus bus
+     */
     @SneakyThrows
     default void registerTo(EventBus bus) {
         var lookup = MethodHandles.privateLookupIn(this.getClass(), MethodHandles.lookup());

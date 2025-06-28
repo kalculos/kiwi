@@ -1,4 +1,7 @@
-module kiwi.core {
+/**
+ * Dedicated utilities for working easier with Java.
+ */
+module kiwi.lang {
     exports io.ib67.kiwi;
     exports io.ib67.kiwi.reflection;
     exports io.ib67.kiwi.closure;

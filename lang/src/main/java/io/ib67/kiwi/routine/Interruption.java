@@ -24,7 +24,17 @@
 
 package io.ib67.kiwi.routine;
 
+import org.jetbrains.annotations.ApiStatus;
+
+/**
+ * An Interruption is a helpful exception that breaks the current control flow to implements things like cancellation.
+ * It doesn't fill stack trace so throwing it will be faster than creating-then-throwing a normal Exception
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class Interruption extends Exception {
+    /**
+     * Its singleton
+     */
     public static final Interruption INTERRUPTION = new Interruption();
 
     private Interruption() {

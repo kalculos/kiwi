@@ -24,8 +24,15 @@
 
 package io.ib67.kiwi.routine;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * The successful variant of {@link Result}.
+ * @param value the success value from operation
+ * @param <T> type of value
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public record Some<T>(T value) implements Result<T> {
     @Override
     public @Nullable T result() {

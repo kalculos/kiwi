@@ -26,11 +26,16 @@ package io.ib67.kiwi.routine.op;
 
 import io.ib67.kiwi.routine.Interruption;
 import io.ib67.kiwi.routine.Uni;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.concurrent.Executor;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * Extra pluggable uni operations.
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class UniOp {
     public static <T> UnaryOperator<Uni<T>> executor(Executor executorService) {
         return u -> c -> executorService.execute(() -> {

@@ -22,27 +22,7 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.event.api;
-
-import io.ib67.kiwi.routine.Interruption;
-
 /**
- * Handler of events.
- * @param <E> type of event
+ * Some reflection related utilities.
  */
-public interface EventHandler<E extends Event> {
-    /**
-     * This method will be called everytime when a new event is posted into the associating {@link EventBus}
-     * @param event the new event
-     * @throws Interruption to interrupt the event delivery. Subsequent handlers will not be aware of the event.
-     */
-    void handle(E event) throws Interruption;
-
-    /**
-     * The priority of this handler. Lower is earlier.
-     * @return priority. should be constant once registered
-     */
-    default int priority() {
-        return 0;
-    }
-}
+package io.ib67.kiwi.reflection;

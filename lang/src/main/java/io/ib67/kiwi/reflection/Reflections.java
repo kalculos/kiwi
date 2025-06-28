@@ -26,10 +26,15 @@ package io.ib67.kiwi.reflection;
 
 import io.ib67.kiwi.routine.Fail;
 import io.ib67.kiwi.routine.Uni;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * Some utility methods for reflection.
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class Reflections {
     public static boolean isPrimitiveOrBox(Class<?> clazz) {
         return clazz.isPrimitive()

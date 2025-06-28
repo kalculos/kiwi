@@ -35,6 +35,10 @@ import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+/**
+ * A Consumer of Consumer. For detailed explanation, please refer to <a href="https://kalculos.github.io/document/kiwi/uni/">documentation</a>
+ * @param <T>
+ */
 public interface Uni<T> {
     static <T> Uni<T> of(T value) {
         return t -> t.onValue(value);

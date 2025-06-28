@@ -23,30 +23,38 @@
  */
 
 plugins {
-    id 'java'
     id("io.freefair.lombok") version "8.13.1"
+    id("io.freefair.aggregate-javadoc") version "8.14"
     id 'jacoco'
+    id 'maven-publish'
 }
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
 allprojects {
-    apply plugin: 'java'
-    apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
-    apply plugin: 'io.freefair.lombok'
-    apply plugin: 'jacoco'
-
     group property("project.group")
     version property("project.version")
-
     repositories {
         mavenLocal()
         mavenCentral()
     }
 }
 
+dependencies {
+    javadocClasspath 'org.jetbrains:annotations:23.0.0'
+    javadocClasspath 'org.projectlombok:lombok:1.18.38'
+    rootProject.subprojects { subproject ->
+        subproject.plugins.withId("java") {
+            javadoc subproject
+        }
+    }
+}
+
 subprojects {
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'io.freefair.lombok'
+    apply plugin: 'jacoco'
+
     dependencies {
         compileOnly 'org.jetbrains:annotations:23.0.0'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
@@ -71,23 +79,24 @@ subprojects {
         if (JavaVersion.current() < javaVersion) {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
-        // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-        // if it is present.
-        // If you remove this line, sources will not be generated.
         withSourcesJar()
+        //withJavadocJar()
     }
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "Kalculos"
-            url = "https://repo.sfclub.cc/"
+    publishing {
+        repositories {
+            mavenLocal()
+            maven {
+                name = "Kalculos"
+                url = "https://repo.sfclub.cc/"
+            }
         }
-    }
-    publications {
-        lang(MavenPublication){
-            artifactId = 'lang'
+        publications {
+            artifact(MavenPublication) {
+                artifactId = project.name
+                group = project.group
+                version = project.version
+                from components.java
+            }
         }
     }
 }

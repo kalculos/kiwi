@@ -27,6 +27,9 @@ package io.ib67.kiwi.event.api;
 import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.routine.Uni;
 
+/**
+ * It delivers an {@link Event} to all {@link EventHandler} that is {@link #register(TypeToken)}ed in this object.
+ */
 public interface EventBus {
     /**
      * Delivers an Event to all related subscribers.

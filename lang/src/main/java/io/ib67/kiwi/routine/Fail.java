@@ -24,32 +24,69 @@
 
 package io.ib67.kiwi.routine;
 
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * Represents a value from failure operation. It can be {@link Nothing} or an error.
+ * As a {@link Uni}, {@link Fail#onItem(InterruptibleConsumer)} do nothing and its {@link #result()} always returns null.
+ * @param failure
+ * @param <T>
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public record Fail<T>(Object failure) implements Result<T> {
+    /**
+     * Given a null in return, you can't know if this null represents failure or empty.
+     * Nothing clarifies the confusion caused by null. It represents Nothing.
+     * Often used with {@link Fail}
+     */
+    @ApiStatus.AvailableSince("1.0.0")
     public static class Nothing {
         public static final Nothing NOTHING = new Nothing();
+
         private Nothing() {
         }
     }
 
     private static final Fail<Nothing> NONE = new Fail<>(Nothing.NOTHING);
 
+    /**
+     * @param <T> any type
+     * @return a Fail with {@link Nothing} as its value.
+     */
     @SuppressWarnings("unchecked")
     public static <T> Fail<T> none() {
         return (Fail<T>) NONE;
     }
 
+    /**
+     * Create a Fail with failure reason.
+     *
+     * @param failure reason
+     * @param <T>     type of element
+     * @return Fail with reason
+     */
     public static <T> Fail<T> of(Object failure) {
         return new Fail<>(failure);
     }
 
+    /**
+     * Always null.
+     *
+     * @return null
+     */
+    @Contract(value = "-> null", pure = true)
     @Override
     @Nullable
     public T result() {
         return null;
     }
 
+    /**
+     * Always do nothing.
+     * @param consumer consumer
+     */
     @Override
     public void accept(InterruptibleConsumer<T> consumer) {
     }

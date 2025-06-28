@@ -28,6 +28,12 @@ import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventHandler;
 
+/**
+ * A simple utilities to fix the type of handler and token.
+ * @param type type of event
+ * @param handler event handler
+ * @param <E> type of event
+ */
 public record EventTuple<E extends Event>(
         TypeToken<E> type, EventHandler<E> handler
 ) {

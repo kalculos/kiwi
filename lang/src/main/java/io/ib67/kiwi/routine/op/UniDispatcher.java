@@ -25,12 +25,19 @@
 package io.ib67.kiwi.routine.op;
 
 import io.ib67.kiwi.routine.Uni;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
+/**
+ * An UniOp that allows more conditions.
+ * See also: {@link UniOp#dispatch(Predicate, Uni.InterruptibleConsumer)}
+ * @param <T> type of uni's element
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class UniDispatcher<T> {
     private final Map<Predicate<T>, Uni.InterruptibleConsumer<T>> map = new HashMap<>();
     private UniDispatcher() {

@@ -25,6 +25,7 @@
 package io.ib67.kiwi.event.util;
 
 import io.ib67.kiwi.routine.Uni;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,11 @@ import java.util.*;
 
 import static java.util.Collections.binarySearch;
 
+/**
+ * An SortedSet implementation backed by ArrayList with sort-at-insertion, offering fast access and slow insertion.
+ * @param <E>
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class SortedArraySet<E> implements SortedSet<E> {
     protected final Comparator<? super E> comparator;
     protected final List<E> backingList;

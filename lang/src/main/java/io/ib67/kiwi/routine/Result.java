@@ -26,6 +26,7 @@ package io.ib67.kiwi.routine;
 
 import io.ib67.kiwi.closure.AnyRunnable;
 import io.ib67.kiwi.closure.AnySupplier;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -34,7 +35,20 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+/**
+ * A Result represents the result of some operation, which can be success or failure.
+ * For a success operation, this result is a {@link Some}. For the failed one, the result is a {@link Fail}<br />
+ * You can also capture a checked exception as a Result by using {@link Result#fromAny(AnySupplier)} method.
+ * @param <T> the type of success value
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public sealed interface Result<T> extends Uni<T> permits Fail, Some {
+    /**
+     * Captures an exception to make Fail, otherwise make {@link Some}
+     * @param supplier operation
+     * @return result
+     * @param <T> type of result from operation
+     */
     static <T> Result<T> fromAny(AnySupplier<T> supplier) {
         try {
             return new Some<>(supplier.get());
@@ -43,6 +57,12 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
         }
     }
 
+    /**
+     * Simliar to {@link #fromAny(AnySupplier)} but treats null as failure. When null is given, it returns {@link Fail#none()}
+     * @param supplier operation
+     * @return result
+     * @param <T> type of result from operation
+     */
     static <T> Result<T> fromNotNull(AnySupplier<T> supplier) {
         try{
             var r = supplier.get();
@@ -53,6 +73,11 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
         }
     }
 
+    /**
+     * It captures an exception from the given runnable, otherwise {@link Some} null
+     * @param runnable operation
+     * @return result
+     */
     static Result<? extends @Nullable Object> runAny(AnyRunnable runnable) {
         try {
             runnable.run();
@@ -128,5 +153,9 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
         throw new IllegalStateException("Impossible");
     }
 
+    /**
+     * @return the returned value of the successful operation. For {@link Fail}, it must be null.
+     */
+    @Nullable
     T result();
 }

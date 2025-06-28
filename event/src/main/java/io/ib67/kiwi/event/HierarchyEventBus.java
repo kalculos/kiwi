@@ -28,6 +28,7 @@ import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Type;
 import java.util.Deque;
@@ -36,6 +37,10 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * An implementation of EventBus that supports delivering events along with the class hierarchy.
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class HierarchyEventBus implements EventBus {
     protected record ChainedBus(EventBus bus, ChainedBus parent) {
     }

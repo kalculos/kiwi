@@ -29,6 +29,7 @@ import io.ib67.kiwi.event.api.EventListenerHost;
 import io.ib67.kiwi.routine.Interruption;
 import io.ib67.kiwi.routine.Uni;
 import lombok.SneakyThrows;
+import org.jetbrains.annotations.ApiStatus;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -40,6 +41,10 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * An utilities that generates handler class for each subscriber methof from subclasses of {@link EventListenerHost}
+ */
+@ApiStatus.AvailableSince("1.0.0")
 public class AsmListenerResolver extends ReflectionListenerResolver implements Opcodes {
     protected static final String DUMP_PATH = System.getProperty("kiwi.event.asmdumpdir", null);
     protected static final AtomicInteger CLASS_COUNTER = new AtomicInteger();
