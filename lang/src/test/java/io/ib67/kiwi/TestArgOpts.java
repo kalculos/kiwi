@@ -22,7 +22,33 @@
  * SOFTWARE.
  */
 
-rootProject.name = 'kiwi'
-include 'lang'
-include 'event'
-include 'javadoc'
+package io.ib67.kiwi;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class TestArgOpts {
+    @Test
+    public void test() {
+        var args = new String[]{
+                "--say", "world", "--boolFlag", "--help", "false", "--repeated", "1", "--repeated", "1", "nonargs", "nonargs"
+        };
+        var argsOpts = ArgOpts.builder()
+                .programName("hellokiwi")
+                .description("A simple helloworld")
+                .args(args).build();
+        var say = argsOpts.string("say", "ababababababababaaaaaaaaaaaaaaaaaaaaabab", "waludo");
+        var boolFlag = argsOpts.bool("boolFlag", false);
+        var flagHelp = argsOpts.bool("help", true);
+        var repeated = argsOpts.stringList("repeated", List.of());
+        assertEquals("world", say);
+        assertTrue(boolFlag);
+        assertFalse(flagHelp);
+        assertEquals("11", repeated.stream().collect(Collectors.joining("")));
+        assertEquals("nonargsnonargs", argsOpts.nonArgOptions().stream().collect(Collectors.joining("")));
+    }
+}

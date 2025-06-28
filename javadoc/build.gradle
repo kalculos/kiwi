@@ -1,3 +1,4 @@
+
 /*
  * MIT License
  *
@@ -21,8 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+plugins {
+    id("io.freefair.aggregate-javadoc") version "8.14"
+    id 'maven-publish'
+}
 
-rootProject.name = 'kiwi'
-include 'lang'
-include 'event'
-include 'javadoc'
+dependencies {
+    javadocClasspath 'org.jetbrains:annotations:23.0.0'
+    javadocClasspath 'org.projectlombok:lombok:1.18.38'
+    rootProject.subprojects { subproject ->
+        subproject.plugins.withId("java") {
+            javadoc subproject
+        }
+    }
+}
+
+javadoc {
+    description = "Aggregated javadocs from all kiwi modules"
+}
+
+/*
+ * Publishing the Javadoc
+ */
+publishing {
+    publications {
+        javadocVersioned(MavenPublication) {
+            artifactId = "javadoc"
+            group = project.group
+            version = project.version
+            artifact javadocJar
+        }
+    }
+}

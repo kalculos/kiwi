@@ -24,7 +24,6 @@
 
 plugins {
     id("io.freefair.lombok") version "8.13.1"
-    id("io.freefair.aggregate-javadoc") version "8.14"
     id 'jacoco'
     id 'maven-publish'
 }
@@ -38,17 +37,10 @@ allprojects {
     }
 }
 
-dependencies {
-    javadocClasspath 'org.jetbrains:annotations:23.0.0'
-    javadocClasspath 'org.projectlombok:lombok:1.18.38'
-    rootProject.subprojects { subproject ->
-        subproject.plugins.withId("java") {
-            javadoc subproject
-        }
-    }
-}
-
 subprojects {
+    if (project.name == "javadoc") {
+        return
+    }
     apply plugin: 'java'
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
@@ -80,16 +72,9 @@ subprojects {
             toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
         }
         withSourcesJar()
-        //withJavadocJar()
+        withJavadocJar()
     }
     publishing {
-        repositories {
-            mavenLocal()
-            maven {
-                name = "Kalculos"
-                url = "https://repo.sfclub.cc/"
-            }
-        }
         publications {
             artifact(MavenPublication) {
                 artifactId = project.name
@@ -98,5 +83,23 @@ subprojects {
                 from components.java
             }
         }
+    }
+}
+
+allprojects {
+    afterEvaluate {
+        publishing {
+            repositories {
+                maven {
+                    name = "KiwiKalculos"
+                    url = "https://repo.sfclub.cc/" + (project.version.endsWith("SNAPSHOT") ? "snapshots" : "releases")
+                    credentials(PasswordCredentials)
+                    authentication {
+                        basic(BasicAuthentication)
+                    }
+                }
+            }
+        }
+
     }
 }

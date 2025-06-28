@@ -27,6 +27,7 @@ package io.ib67.kiwi;
 import io.ib67.kiwi.reflection.Reflections;
 import io.ib67.kiwi.reflection.Unsafe;
 import io.ib67.kiwi.routine.Uni;
+import lombok.Generated;
 import lombok.experimental.UtilityClass;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 /**
  * Useful tools for diagnosing problems. Business codes should not rely on these tools as it utilizes {@link Unsafe}
  */
+@Generated // not going to unit-test this
 @ApiStatus.Experimental
 @UtilityClass
 public final class Diag {

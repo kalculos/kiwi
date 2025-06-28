@@ -26,6 +26,7 @@ package io.ib67.kiwi.reflection;
 
 import io.ib67.kiwi.routine.Fail;
 import io.ib67.kiwi.routine.Uni;
+import lombok.SneakyThrows;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.lang.reflect.Field;
@@ -69,5 +70,33 @@ public class Reflections {
             }
             iterateMethodsWithSuper(clazz.getSuperclass()).onItem(c);
         };
+    }
+
+    @SneakyThrows
+    public static Field fieldOf(Class<?> clazz, String fieldName) {
+        return clazz.getDeclaredField(fieldName);
+    }
+
+    @SneakyThrows
+    public static Field fieldOfSuper(Class<?> clazz, String fieldName) {
+        var field =  iterateFieldsWithSuper(clazz)
+                .filter(it -> it.getName().equals(fieldName))
+                .takeOne();
+        if(field == null) throw new NoSuchFieldException("No such field:" + fieldName);
+        return field;
+    }
+
+    @SneakyThrows
+    public static Method methodOf(Class<?> clazz, String methodName) {
+        return clazz.getDeclaredMethod(methodName);
+    }
+
+    @SneakyThrows
+    public static Method methodOfSuper(Class<?> clazz, String methodName) {
+        var method = iterateMethodsWithSuper(clazz)
+                .filter(it -> it.getName().equals(methodName))
+                .takeOne();
+        if (method == null) throw new NoSuchMethodException("No such method:" + methodName);
+        return method;
     }
 }

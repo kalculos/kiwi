@@ -25,12 +25,14 @@
 package io.ib67.kiwi;
 
 import io.ib67.kiwi.routine.Uni;
+import lombok.Generated;
 import lombok.experimental.UtilityClass;
 
 import java.security.SecureRandom;
 import java.util.concurrent.ThreadLocalRandom;
 
 @UtilityClass
+@Generated // not going to unit-test this
 public final class RandomHelper {
 
     public static int number(int bound) {
