@@ -22,28 +22,38 @@
  * SOFTWARE.
  */
 
-package io.ib67.kiwi.event.api;
+package io.ib67.kiwi.event;
 
 import io.ib67.kiwi.TypeToken;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
+import io.ib67.kiwi.event.api.Event;
+import io.ib67.kiwi.event.api.EventBus;
+import io.ib67.kiwi.event.api.EventHandler;
+import io.ib67.kiwi.event.util.SortedArraySet;
+import io.ib67.kiwi.routine.Interruption;
 
-/**
- * An {@link Event}, with its properties, can be delivered to subscribers by posting itself on the EventBus.
- */
-@ApiStatus.AvailableSince("0.1.0")
-public interface Event {
-    ClassValue<TypeToken<? extends Event>> RAW_TOKENS = new ClassValue<>() {
-        @Override
-        protected TypeToken<? extends Event> computeValue(@NotNull Class<?> type) {
-            return TypeToken.resolve(type);
+import java.util.Comparator;
+import java.util.SortedSet;
+
+public class SimpleEventBus implements EventBus {
+    protected final SortedSet<EventHandler<?>> handlers;
+    public SimpleEventBus(int initialCapacity) {
+        this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(EventHandler::priority));
+    }
+
+    @Override
+    public boolean post(Event event) {
+        try{
+            for (EventHandler handler : handlers) {
+                handler.handle(event);
+            }
+            return true;
+        } catch (Interruption e) {
+            return false;
         }
-    };
-    /**
-     * TypeToken of the Event. it may depend on some information gathered from an instance of Event.
-     * @return TypeToken of the Event.
-     */
-    default TypeToken<? extends Event> type(){
-        return RAW_TOKENS.get(this.getClass());
+    }
+
+    @Override
+    public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
+        handlers.add(handler);
     }
 }

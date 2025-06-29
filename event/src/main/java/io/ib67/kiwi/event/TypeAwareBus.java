@@ -30,23 +30,40 @@ import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
 import io.ib67.kiwi.event.util.SortedArraySet;
 import io.ib67.kiwi.routine.Interruption;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.Comparator;
-import java.util.SortedSet;
+import java.util.Set;
 
-class SimpleEventBus implements EventBus {
-    protected final SortedSet<EventHandler> handlers;
+class TypeAwareBus implements EventBus {
+    protected final Set<HandlerEntry> handlers;
 
-    public SimpleEventBus(int initialCapacity) {
-        this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(EventHandler::priority));
+    /**
+     * This constructor is for JMH testing only.
+     */
+    @ApiStatus.Internal
+    TypeAwareBus(Set<HandlerEntry> handlers) {
+        this.handlers = handlers;
+    }
+
+    public TypeAwareBus(int initialCapacity) {
+        this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(HandlerEntry::priority));
     }
 
     @Override
     public boolean post(Event event) {
+        var eventType = event.type();
         try {
             var handlers = this.handlers;
             for (var handler : handlers) {
-                handler.handle(event);
+                var cache = handler.signatureCache();
+                if (!cache.containsKey(eventType)) {
+                    var result = eventType.assignableTo(handler.type());
+                    cache.put(event.type(), result);
+                }
+                if (cache.get(eventType)) {
+                    handler.handler().handle(event);
+                }
             }
             return true;
         } catch (Interruption ignored) {
@@ -56,6 +73,16 @@ class SimpleEventBus implements EventBus {
 
     @Override
     public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
-        handlers.add(handler);
+        handlers.add(new HandlerEntry<>(handler, type, new TypeTokenSet(16)));
+    }
+
+    record HandlerEntry<E extends Event>(
+            EventHandler<E> handler,
+            TypeToken<E> type,
+            TypeTokenSet signatureCache
+    ) {
+        int priority() {
+            return handler.priority();
+        }
     }
 }
