@@ -63,7 +63,6 @@ public class TypeToken<C> {
     private static final int MASK_WILDCARD_SUPER = 1 << 2;
     private static final TypeToken<?>[] EMPTY = new TypeToken[0];
     private static final TypeToken<Object> OBJECT = new TypeToken<>(Object.class);
-    private static final Map<Type, TypeToken<?>> CACHED = new WeakHashMap<>();
     private Class<?> baseTypeRaw;
     private TypeToken<?>[] typeParams;
     private int hashCode;
@@ -122,10 +121,8 @@ public class TypeToken<C> {
         if (params.length != actualTypeParams.length) {
             throw new IllegalArgumentException("Type parameters don't match");
         }
-        synchronized (CACHED) {
-            for (int i = 0; i < params.length; i++) {
-                subTokens[i] = CACHED.computeIfAbsent(actualTypeParams[i], TypeToken::new);
-            }
+        for (int i = 0; i < params.length; i++) {
+            subTokens[i] = new TypeToken<>(actualTypeParams[i]);
         }
         return new TypeToken<>(type, subTokens);
     }
@@ -148,7 +145,7 @@ public class TypeToken<C> {
         Objects.requireNonNull(type);
         return switch (type.getWildcardKind()) {
             case SUPER ->
-                    liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), liftBySuper) : OBJECT;
+                    liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), true) : OBJECT;
             case EXTENDS -> TypeToken.reduceBounds(type.typeParams[0], liftBySuper);
             case null -> {
                 var copiedToken = new TypeToken<>(type);
@@ -163,21 +160,11 @@ public class TypeToken<C> {
     }
 
     /**
-     * Accepts a type then resolves it as a TypeToken.
-     */
-    @SuppressWarnings("unchecked")
-    public static <C> TypeToken<C> resolve(Type type) {
-        synchronized (CACHED) {
-            return (TypeToken<C>) CACHED.computeIfAbsent(type, TypeToken::resolve0);
-        }
-    }
-
-    /**
      * This method _creates_ TT from a type while {@link TypeToken#resolveTypeToken(Type)} resolves from
      * TT subclass itself.
      */
     @SuppressWarnings("unchecked")
-    private static <C> TypeToken<C> resolve0(Type type) {
+    public static <C> TypeToken<C> resolve(Type type) {
         return switch (type) {
             case Class<?> clazz -> {
                 if (clazz == Object.class) yield (TypeToken<C>) OBJECT;
@@ -223,10 +210,8 @@ public class TypeToken<C> {
                 this.baseTypeRaw = clazz;
                 var pms = parameterizedType.getActualTypeArguments();
                 var tokens = new TypeToken<?>[pms.length];
-                synchronized (CACHED) {
-                    for (int i = 0; i < tokens.length; i++) {
-                        tokens[i] = CACHED.computeIfAbsent(pms[i], TypeToken::new);
-                    }
+                for (int i = 0; i < tokens.length; i++) {
+                    tokens[i] = new TypeToken<>(pms[i]);
                 }
                 this.typeParams = tokens;
             }
@@ -337,7 +322,6 @@ public class TypeToken<C> {
             throw new IllegalArgumentException("This TypeToken doesn't have a baseType. Is it a type variable?");
         if (!clazz.isAssignableFrom(baseTypeRaw))
             throw new IllegalArgumentException("The base type of this TypeToken is not assignable to " + clazz);
-        //todo superclass/interfaces is null if selfTypeRaw is a interface since interfaces doesn't extend Object
         Deque<Type> path = new ArrayDeque<Type>(8);
         var success = findPathToSuper(path, clazz.isInterface(), baseTypeRaw, clazz);
         if (!success) {
@@ -414,13 +398,13 @@ public class TypeToken<C> {
         if (clz == clazz) return true;
         var genericSuper = clz.getGenericSuperclass();
         if (genericSuper != null) { // for Object and interfaces.
-            if (findPathToSuper(typeDeque, findInterface, clz.getGenericSuperclass(), clazz)) {
+            if (findPathToSuper(typeDeque, findInterface, genericSuper, clazz)) {
                 return true;
             }
         }
         if (findInterface) {
             for (Type genericInterface : clz.getGenericInterfaces()) {
-                if (findPathToSuper(typeDeque, findInterface, genericInterface, clazz)) {
+                if (findPathToSuper(typeDeque, true, genericInterface, clazz)) {
                     return true;
                 }
             }
