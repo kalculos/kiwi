@@ -61,12 +61,16 @@ public class TypeToken<C> {
     private static final int MASK_ARRAY = 1;
     private static final int MASK_WILDCARD_EXTENDS = 1 << 1;
     private static final int MASK_WILDCARD_SUPER = 1 << 2;
-    private static final TypeToken<?>[] EMPTY = new TypeToken[0];
     private static final TypeToken<Object> OBJECT = new TypeToken<>(Object.class);
+    private static final ThreadLocal<Map<Type, TypeToken<?>>> CACHE = ThreadLocal.withInitial(WeakHashMap::new);
     private Class<?> baseTypeRaw;
     private TypeToken<?>[] typeParams;
     private int hashCode;
     private int flags = 0;
+
+    static {
+        CACHE.get().put(Object.class, OBJECT);
+    }
 
     /**
      * Copy constructor
@@ -121,8 +125,9 @@ public class TypeToken<C> {
         if (params.length != actualTypeParams.length) {
             throw new IllegalArgumentException("Type parameters don't match");
         }
+        var cache = CACHE.get();
         for (int i = 0; i < params.length; i++) {
-            subTokens[i] = new TypeToken<>(actualTypeParams[i]);
+            subTokens[i] = cache.computeIfAbsent(actualTypeParams[i], TypeToken::new);
         }
         return new TypeToken<>(type, subTokens);
     }
@@ -144,8 +149,7 @@ public class TypeToken<C> {
     public static TypeToken<?> reduceBounds(TypeToken<?> type, boolean liftBySuper) {
         Objects.requireNonNull(type);
         return switch (type.getWildcardKind()) {
-            case SUPER ->
-                    liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), true) : OBJECT;
+            case SUPER -> liftBySuper ? TypeToken.reduceBounds(type.typeParams[0].resolveDirectParent(), true) : OBJECT;
             case EXTENDS -> TypeToken.reduceBounds(type.typeParams[0], liftBySuper);
             case null -> {
                 var copiedToken = new TypeToken<>(type);
@@ -165,34 +169,17 @@ public class TypeToken<C> {
      */
     @SuppressWarnings("unchecked")
     public static <C> TypeToken<C> resolve(Type type) {
+        var cache = CACHE.get();
+        return (TypeToken<C>) cache.computeIfAbsent(type, TypeToken::resolve0);
+    }
+
+    private static <C> TypeToken<C> resolve0(Type type) {
         return switch (type) {
-            case Class<?> clazz -> {
-                if (clazz == Object.class) yield (TypeToken<C>) OBJECT;
-                var params = clazz.getTypeParameters();
-                if (params.length == 0) yield new TypeToken<>(clazz, EMPTY);
-                var subTokens = new TypeToken<?>[params.length];
-                for (int i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    subTokens[i] = TypeToken.resolve(param);
-                }
-                yield new TypeToken<>(clazz, subTokens);
-            }
             case TypeVariable<?> typeVariable -> {
                 var bounds = typeVariable.getBounds(); //todo upper and super bound?
                 yield bounds.length == 0 ? (TypeToken<C>) OBJECT : TypeToken.resolve(bounds[0]);
             }
-            case WildcardType wildcardType -> new TypeToken<>(wildcardType);
-            case ParameterizedType parameterizedType -> {
-                var self = parameterizedType.getRawType();
-                if (self == Object.class) yield (TypeToken<C>) OBJECT;
-                var actualParam = parameterizedType.getActualTypeArguments();
-                var subTokens = new TypeToken<?>[actualParam.length];
-                for (int i = 0; i < subTokens.length; i++) {
-                    subTokens[i] = resolve(actualParam[i]);
-                }
-                yield new TypeToken<>((Class<?>) self, subTokens);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + type + ", type: " + type.getClass());
+            default -> new TypeToken<>(type);
         };
     }
 
@@ -210,13 +197,19 @@ public class TypeToken<C> {
                 this.baseTypeRaw = clazz;
                 var pms = parameterizedType.getActualTypeArguments();
                 var tokens = new TypeToken<?>[pms.length];
+                var cache = CACHE.get();
                 for (int i = 0; i < tokens.length; i++) {
-                    tokens[i] = new TypeToken<>(pms[i]);
+                    tokens[i] = cache.computeIfAbsent(pms[i], TypeToken::new);
                 }
                 this.typeParams = tokens;
             }
             case Class<?> clazz -> {
-                this.typeParams = EMPTY;
+                var args = clazz.getTypeParameters();
+                var param = new TypeToken[args.length];
+                for (int i = 0; i < args.length; i++) {
+                    param[i] = TypeToken.resolve(args[i]);
+                }
+                this.typeParams = param;
                 baseTypeRaw = clazz;
                 if (clazz.isArray()) flags |= MASK_ARRAY;
             }
