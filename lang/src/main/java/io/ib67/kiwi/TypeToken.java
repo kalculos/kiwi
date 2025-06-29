@@ -87,7 +87,7 @@ public class TypeToken<C> {
         hashCode = hash(baseTypeRaw, typeParams, flags);
     }
 
-    private TypeToken(Class<?> selfTypeRaw, TypeToken<?>... typeParams) {
+    public TypeToken(Class<?> selfTypeRaw, TypeToken<?>... typeParams) {
         Objects.requireNonNull(selfTypeRaw);
         Objects.requireNonNull(typeParams);
         this.baseTypeRaw = selfTypeRaw;
