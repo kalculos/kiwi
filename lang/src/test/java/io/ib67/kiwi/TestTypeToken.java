@@ -25,7 +25,6 @@
 package io.ib67.kiwi;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -52,14 +51,15 @@ public class TestTypeToken {
     }
 
     @Test
-    public void testArray(){
-        var token = new TypeToken<List<String[]>[]>(){};
+    public void testArray() {
+        var token = new TypeToken<List<String[]>[]>() {
+        };
         assertTrue(token.isArray());
         assertEquals("List<String[]>[]", token.toString());
     }
 
     @Test
-    public void testEquals(){
+    public void testEquals() {
         var tokenString = TypeToken.getParameterized(List.class, String.class);
         var token = new TypeToken<List<String>>() {
         };
@@ -93,7 +93,8 @@ public class TestTypeToken {
         assertEquals("List<? super TypeB<?>>", wildcardToken2.toString());
         assertEquals("List<TypeA>", TypeToken.reduceBounds(wildcardToken2, true).toString());
         assertEquals("List<Object>", TypeToken.reduceBounds(wildcardToken2, false).toString());
-        class TypeC extends TypeB<TypeA[]>  {}
+        class TypeC extends TypeB<TypeA[]> {
+        }
         var typeC = TypeToken.resolve(TypeC.class);
         assertEquals("TypeB<TypeA[]>", typeC.resolveDirectParent().toString());
         assertTrue(typeC.resolveDirectParent().getTypeParams().getFirst().isArray());
@@ -114,7 +115,8 @@ public class TestTypeToken {
             public A produce() {
                 return null;
             }
-            public List<? extends A> complexProduce(){
+
+            public List<? extends A> complexProduce() {
                 return null;
             }
         }
@@ -138,4 +140,61 @@ public class TestTypeToken {
         };
         assertEquals("Map<String, Map<Map<String, String>, List<?>>>", token.toString());
     }
+
+    @Test
+    public void testAssignableTo() {
+        //@formatter:off
+        var typeListString = new TypeToken<List<String>>(){};
+        var typeListCharSeq = new TypeToken<List<CharSequence>>(){};
+        var typeListWhoExtendsCharSeq = new TypeToken<List<? extends CharSequence>>(){};
+        var typeListWhoSuperString = new TypeToken<List<? super String>>(){};
+
+        var typeArrayString = new TypeToken<String[]>(){};
+        var typeArrayCharSeq = new TypeToken<CharSequence[]>(){};
+        var typeListArrayWhoExtendsCharSeq = new TypeToken<List<? extends CharSequence[]>>(){};
+        var typeListArrayString = new TypeToken<List<String[]>>(){};
+
+        var typeInteger = new TypeToken<Integer>(){};
+        var typeNumber = new TypeToken<Number>(){};
+        //@formatter:on
+        // idential to themselves
+        assertTrue(typeListString.assignableTo(typeListString));
+        assertTrue(typeListCharSeq.assignableTo(typeListCharSeq));
+        assertTrue(typeListWhoExtendsCharSeq.assignableTo(typeListWhoExtendsCharSeq));
+        assertTrue(typeListWhoSuperString.assignableTo(typeListWhoSuperString));
+        assertTrue(typeArrayString.assignableTo(typeArrayString));
+        assertTrue(typeArrayCharSeq.assignableTo(typeArrayCharSeq));
+        assertTrue(typeListArrayString.assignableTo(typeListArrayString));
+        assertTrue(typeInteger.assignableTo(typeInteger));
+        assertTrue(typeNumber.assignableTo(typeNumber));
+        // for type params: type comparison, wildcard support
+        assertFalse(typeListString.assignableTo(typeListCharSeq)); // List<String> NOT List<CharSequence>
+        assertFalse(typeListCharSeq.assignableTo(typeListString)); // AND vice versa
+
+        assertTrue(typeListString.assignableTo(typeListWhoExtendsCharSeq)); // List<String> IS List<? extends CharSequence>
+        assertFalse(typeListWhoExtendsCharSeq.assignableTo(typeListString)); // AND List<? extends CharSequence> NOT List<String>
+
+        assertFalse(typeListWhoExtendsCharSeq.assignableTo(typeListWhoSuperString)); // List<? extends CharSequence> NOT List<? super String>
+        assertFalse(typeListWhoSuperString.assignableTo(typeListWhoExtendsCharSeq)); // AND vice versa
+
+        assertTrue(typeListString.assignableTo(typeListWhoSuperString)); // List<String> IS List<? super String>
+        assertFalse(typeListWhoSuperString.assignableTo(typeListString)); // AND List<? super String> NOT List<String>
+
+        assertTrue(typeListCharSeq.assignableTo(typeListWhoExtendsCharSeq)); // List<CharSequence> IS List<? extends CharSequence>
+        assertFalse(typeListWhoExtendsCharSeq.assignableTo(typeListCharSeq)); // AND List<? extends CharSequence> NOT List<CharSequence>
+
+        // for arrays(and in param)
+        assertFalse(typeArrayString.assignableTo(typeArrayCharSeq)); // String[] NOT CharSequence[]
+        assertFalse(typeArrayCharSeq.assignableTo(typeArrayString)); // AND vice versa
+
+        assertTrue(typeListArrayString.assignableTo(typeListArrayWhoExtendsCharSeq)); // List<String[]> IS List<? extends CharSequence[]>
+        assertFalse(typeListArrayWhoExtendsCharSeq.assignableTo(typeListArrayString)); // AND List<? extends CharSequence[]> NOT List<String[]>
+
+        //for normal types:
+        assertTrue(typeInteger.assignableTo(typeNumber));
+        assertFalse(typeNumber.assignableTo(typeInteger));
+    }
+
+    //todo test hash function
+
 }

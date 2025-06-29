@@ -65,7 +65,7 @@ public class TypeToken<C> {
     private static final ThreadLocal<Map<Type, TypeToken<?>>> CACHE = ThreadLocal.withInitial(WeakHashMap::new);
     private Class<?> baseTypeRaw;
     private TypeToken<?>[] typeParams;
-    private int hashCode;
+    private long hashCode;
     private int flags = 0;
 
     static {
@@ -440,6 +440,11 @@ public class TypeToken<C> {
         return null;
     }
 
+    public TypeToken<?> getWildcardBound() {
+        if (!this.isWildcard()) throw new UnsupportedOperationException("This typeToken is not a wildcard.");
+        return typeParams[0];
+    }
+
     @Override
     public String toString() {
         var sb = new StringBuilder();
@@ -473,6 +478,10 @@ public class TypeToken<C> {
 
     @Override
     public int hashCode() {
+        return (int) hashCode;
+    }
+
+    public long longHash() {
         return hashCode;
     }
 
@@ -480,18 +489,84 @@ public class TypeToken<C> {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj instanceof TypeToken<?> tk) {
-            return tk.baseTypeRaw == this.baseTypeRaw
+            return tk.hashCode == this.hashCode && tk.baseTypeRaw == this.baseTypeRaw
                     && Arrays.equals(tk.typeParams, this.typeParams)
                     && flags == tk.flags;
         }
         return false;
     }
 
-    private static int hash(Class<?> selfTypeRaw, TypeToken<?>[] typeParams, int flags) {
-        var hashCode = 33;
-        hashCode = 31 * hashCode + (selfTypeRaw == null ? 0 : selfTypeRaw.hashCode());
-        hashCode = 31 * hashCode + (typeParams == null ? 0 : Arrays.hashCode(typeParams));
-        hashCode = 31 * hashCode + flags;
+    /**
+     * Check if THIS typetoken is compatible with THAT type
+     *
+     * @param that typetoken to check
+     * @return compatible?
+     */
+    public boolean assignableTo(TypeToken<?> that) {
+        return assignableTo0(true, that);
+    }
+
+    private boolean assignableTo0(boolean outerMost, TypeToken<?> that) {
+        Objects.requireNonNull(that);
+        if (that.isWildcard()) {
+            var thatBound = that.getWildcardBound();
+            var thatKind = that.getWildcardKind();
+            if (this.isWildcard()) {
+                var thisBound = this.getWildcardBound();
+                var thisKind = this.getWildcardKind();
+                if (thatKind != thisKind) return false;
+                return thatKind == WildcardKind.EXTENDS
+                        ? thatBound.baseTypeRaw.isAssignableFrom(thisBound.baseTypeRaw)
+                        : thisBound.baseTypeRaw.isAssignableFrom(thatBound.baseTypeRaw);
+            }
+            return thatKind == WildcardKind.EXTENDS
+                    ? thatBound.baseTypeRaw.isAssignableFrom(this.baseTypeRaw)
+                    : this.baseTypeRaw.isAssignableFrom(thatBound.baseTypeRaw);
+        }
+        if (that.isArray() && this.baseTypeRaw != that.baseTypeRaw) return false; // array without wildcard
+        if (this.baseTypeRaw != that.baseTypeRaw) {
+            if (!outerMost) {
+                return false; // type params matches exactly, or use wildcards.
+            }
+            if (that.baseTypeRaw.isAssignableFrom(baseTypeRaw)) {
+                return that.assignableTo0(outerMost, this.inferType(that.baseTypeRaw));
+            } else {
+                return false; // not assignable
+            }
+        }
+        var thisParams = this.typeParams;
+        var thatParams = that.typeParams;
+        for (int i = 0; i < thisParams.length; i++) { // the len of type params should be identical
+            if (!thisParams[i].assignableTo0(false, thatParams[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static long hash(Class<?> selfTypeRaw, TypeToken<?>[] typeParams, int flags) {
+        long hashCode = 33L;
+        // Use a larger prime number for 64-bit calculations
+        final long PRIME = 0x5DEECE66DL;
+        // Incorporate class hash
+        if (selfTypeRaw != null) {
+            hashCode = PRIME * hashCode + selfTypeRaw.hashCode();
+        }
+        // Handle type parameters
+        if (typeParams != null) {
+            for (TypeToken<?> param : typeParams) {
+                // Can directly use param.hashCode since we have access to it
+                if (param != null) {
+                    hashCode = PRIME * hashCode + param.hashCode;
+                }
+            }
+            // Include array length in hash computation
+            hashCode = PRIME * hashCode + typeParams.length;
+        }
+        // Mix in the flags
+        hashCode = PRIME * hashCode + flags;
+        // Final mixing step to distribute bits
+        hashCode = (hashCode ^ (hashCode >>> 32));
         return hashCode;
     }
 }
