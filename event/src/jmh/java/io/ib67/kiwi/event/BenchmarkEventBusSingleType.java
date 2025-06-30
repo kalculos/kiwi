@@ -54,9 +54,6 @@ public class BenchmarkEventBusSingleType {
     @Param({"100"})
     public int numHandlers;
 
-    @Param({"true", "false"})
-    public boolean parameterized = false;
-
     @Param({"0.3", "0.6"})
     public double wrongFactor;
 
@@ -66,6 +63,7 @@ public class BenchmarkEventBusSingleType {
     private Event eventToChaoticDeliver;
     private EventBus busSimple;
     private EventBus busTyped;
+    private EventBus busInterruption;
     private TypeAwareBus busTypedChaotic;
 
     @Setup
@@ -73,14 +71,20 @@ public class BenchmarkEventBusSingleType {
         var eventUntyped = new TestEventA();
         var eventTyped = new TestEventB<>(TypeToken.getParameterized(TestEventB.class, String.class));
         busSimple = new SimpleEventBus(numHandlers);
+        busInterruption = new TypeAwareBus(numHandlers);
         busTyped = new TypeAwareBus(numHandlers);
         busTypedChaotic = new TypeAwareBus(numHandlers);
         arrayHandlers = new ArrayList<>();
-        eventToDeliver = parameterized ? eventTyped : eventUntyped;
+        eventToDeliver = eventUntyped;
         for (int i = 0; i < numHandlers; i++) {
             busSimple.register(eventToDeliver.type(), this::handler);
             arrayHandlers.add(this::handler);
             busTyped.register(eventToDeliver.type(), this::handler);
+            if (i == numHandlers - 1) {
+                busInterruption.register(eventToDeliver.type(), this::handlerInterrupting);
+            } else {
+                busInterruption.register(eventToDeliver.type(), this::handler);
+            }
         }
 
         int wrongListenerNum = (int) (wrongFactor * numHandlers);
@@ -103,6 +107,10 @@ public class BenchmarkEventBusSingleType {
 
     <E extends Event> void handler(E event) {
         Blackhole.consumeCPU(10);
+    }
+
+    <E extends Event> void handlerInterrupting(E event) throws Interruption {
+        throw Interruption.INTERRUPTION;
     }
 
     @Benchmark
@@ -134,5 +142,9 @@ public class BenchmarkEventBusSingleType {
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void deliverEventTypedChaotic() {
         busTypedChaotic.post(eventToChaoticDeliver);
+    }
+
+    public void deliverEventInterrupting() {
+        busInterruption.post(eventToChaoticDeliver);
     }
 }
