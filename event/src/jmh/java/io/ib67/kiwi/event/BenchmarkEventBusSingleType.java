@@ -144,6 +144,8 @@ public class BenchmarkEventBusSingleType {
         busTypedChaotic.post(eventToChaoticDeliver);
     }
 
+    @Benchmark
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
     public void deliverEventInterrupting() {
         busInterruption.post(eventToChaoticDeliver);
     }
