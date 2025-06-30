@@ -522,8 +522,8 @@ public class TypeToken<C> {
             return thatKind == WildcardKind.EXTENDS
                     ? thatBound.baseTypeRaw.isAssignableFrom(this.baseTypeRaw)
                     : this.baseTypeRaw.isAssignableFrom(thatBound.baseTypeRaw);
-        }
-        if (that.isArray() && this.baseTypeRaw != that.baseTypeRaw) return false; // array without wildcard
+        } else if(this.isWildcard()) return false;
+        if (that.isArray()) return that.baseTypeRaw.isAssignableFrom(this.baseTypeRaw); // array without wildcard
         if (this.baseTypeRaw != that.baseTypeRaw) {
             if (!outerMost) {
                 return false; // type params matches exactly, or use wildcards.
