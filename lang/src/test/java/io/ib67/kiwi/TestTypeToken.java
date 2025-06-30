@@ -184,7 +184,7 @@ public class TestTypeToken {
         assertFalse(typeListWhoExtendsCharSeq.assignableTo(typeListCharSeq)); // AND List<? extends CharSequence> NOT List<CharSequence>
 
         // for arrays(and in param)
-        assertFalse(typeArrayString.assignableTo(typeArrayCharSeq)); // String[] NOT CharSequence[]
+        assertTrue(typeArrayString.assignableTo(typeArrayCharSeq)); // String[] IS CharSequence[]
         assertFalse(typeArrayCharSeq.assignableTo(typeArrayString)); // AND vice versa
 
         assertTrue(typeListArrayString.assignableTo(typeListArrayWhoExtendsCharSeq)); // List<String[]> IS List<? extends CharSequence[]>
