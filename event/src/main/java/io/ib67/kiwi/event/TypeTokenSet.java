@@ -48,7 +48,7 @@ class TypeTokenSet {
         return Long.hashCode(key) & (keys.length - 1);
     }
 
-    public boolean get(TypeToken<?> key) {
+    public Boolean get(TypeToken<?> key) {
         var hash = key.longHash();
         int idx = index(hash);
         while (used[idx]) {
@@ -57,7 +57,7 @@ class TypeTokenSet {
             }
             idx = (idx + 1) & (keys.length - 1);
         }
-        return false;
+        return null;
     }
 
     public boolean containsKey(TypeToken<?> key) {

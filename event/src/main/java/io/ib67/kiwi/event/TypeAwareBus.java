@@ -32,11 +32,11 @@ import io.ib67.kiwi.event.util.SortedArraySet;
 import io.ib67.kiwi.routine.Interruption;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.Comparator;
-import java.util.Set;
+import java.util.*;
 
 class TypeAwareBus implements EventBus {
     protected final Set<HandlerEntry> handlers;
+    protected final Map<TypeToken<?>, TypeTokenSet> signatureCache;
 
     /**
      * This constructor is for JMH testing only.
@@ -44,10 +44,12 @@ class TypeAwareBus implements EventBus {
     @ApiStatus.Internal
     TypeAwareBus(Set<HandlerEntry> handlers) {
         this.handlers = handlers;
+        this.signatureCache = new HashMap<>();
     }
 
     public TypeAwareBus(int initialCapacity) {
         this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(HandlerEntry::priority));
+        this.signatureCache = new HashMap<>();
     }
 
     @Override
@@ -56,14 +58,13 @@ class TypeAwareBus implements EventBus {
         try {
             var handlers = this.handlers;
             for (var handler : handlers) {
-                var cache = handler.signatureCache();
-                if (!cache.containsKey(eventType)) {
-                    var result = eventType.assignableTo(handler.type());
-                    cache.put(event.type(), result);
+                var cache = handler.singatureCache();
+                var result = cache.get(eventType);
+                if (result == null) { // use null to represent value not present.
+                    result = eventType.assignableTo(handler.type());
+                    cache.put(eventType, result);
                 }
-                if (cache.get(eventType)) {
-                    handler.handler().handle(event);
-                }
+                if (result) handler.handler().handle(event);
             }
             return true;
         } catch (Interruption ignored) {
@@ -73,13 +74,13 @@ class TypeAwareBus implements EventBus {
 
     @Override
     public <E extends Event> void register(TypeToken<E> type, EventHandler<E> handler) {
-        handlers.add(new HandlerEntry<>(handler, type, new TypeTokenSet(16)));
+        handlers.add(new HandlerEntry<>(handler, type, signatureCache.computeIfAbsent(type, it -> new TypeTokenSet(16))));
     }
 
     record HandlerEntry<E extends Event>(
             EventHandler<E> handler,
             TypeToken<E> type,
-            TypeTokenSet signatureCache
+            TypeTokenSet singatureCache
     ) {
         int priority() {
             return handler.priority();

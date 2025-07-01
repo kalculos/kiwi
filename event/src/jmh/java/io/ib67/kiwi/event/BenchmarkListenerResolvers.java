@@ -99,7 +99,7 @@ public class BenchmarkListenerResolvers {
 
     @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void deliverEventBus() {
+    public void deliverEventBusMethodReference() {
         busSimple.post(event);
     }
 
