@@ -34,75 +34,39 @@ import java.util.*;
 import static java.util.Collections.binarySearch;
 
 /**
- * An SortedSet implementation backed by ArrayList with sort-at-insertion, offering fast access and slow insertion.
+ * A List implementation backed by ArrayList with sort-at-insertion, offering fast access and slow insertion.
+ *
  * @param <E>
  */
 @ApiStatus.AvailableSince("1.0.0")
-public class SortedArraySet<E> implements SortedSet<E> {
+public class SortedArrayList<E> implements List<E> {
     protected final Comparator<? super E> comparator;
     protected final List<E> backingList;
 
     /**
      * Copy constructor.
      */
-    protected SortedArraySet(List<E> backingArray, Comparator<? super E> comparator) {
+    protected SortedArrayList(List<E> backingArray, Comparator<? super E> comparator) {
         this.backingList = backingArray;
         this.comparator = comparator;
     }
 
-    public SortedArraySet(int initialCapacity, Comparator<? super E> comparator) {
+    public SortedArrayList(int initialCapacity, Comparator<? super E> comparator) {
         this.comparator = comparator;
         this.backingList = new ArrayList<>(initialCapacity);
     }
 
-    @Override
     public @Nullable Comparator<? super E> comparator() {
         return comparator;
-    }
-
-    @Override
-    public @NotNull SortedSet<E> subSet(E fromElement, E toElement) {
-        return new SortedArraySet<>(
-                backingList.subList(
-                        indexOfThrow(fromElement),
-                        indexOfThrow(toElement)
-                ), comparator
-        );
-    }
-
-    @Override
-    public @NotNull SortedSet<E> headSet(E toElement) {
-        return new SortedArraySet<>(
-                backingList.subList(0, indexOfThrow(toElement)),
-                comparator
-        );
-    }
-
-    @Override
-    public @NotNull SortedSet<E> tailSet(E fromElement) {
-        return new SortedArraySet<>(
-                backingList.subList(indexOfThrow(fromElement), backingList.size()),
-                comparator
-        );
     }
 
     protected int indexOfThrow(E element) {
         Objects.requireNonNull(element, "element");
         var index = binarySearch(backingList, element, comparator);
-        if(index < 0){
+        if (index < 0) {
             throw new NoSuchElementException(element.toString());
         }
         return index;
-    }
-
-    @Override
-    public E first() {
-        return backingList.getFirst();
-    }
-
-    @Override
-    public E last() {
-        return backingList.getLast();
     }
 
     @Override
@@ -178,6 +142,11 @@ public class SortedArraySet<E> implements SortedSet<E> {
     }
 
     @Override
+    public boolean addAll(int index, @NotNull Collection<? extends E> c) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean retainAll(@NotNull Collection<?> c) {
         return backingList.retainAll(c);
     }
@@ -190,5 +159,55 @@ public class SortedArraySet<E> implements SortedSet<E> {
     @Override
     public void clear() {
         backingList.clear();
+    }
+
+    @Override
+    public E get(int index) {
+        return backingList.get(index);
+    }
+
+    @Override
+    public E set(int index, E element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void add(int index, E element) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public E remove(int index) {
+        return backingList.remove(index);
+    }
+
+    @Override
+    public int indexOf(Object o) {
+        return indexOfThrow((E) o);
+    }
+
+    @Override
+    public int lastIndexOf(Object o) {
+        return backingList.lastIndexOf(o);
+    }
+
+    @Override
+    public @NotNull ListIterator<E> listIterator() {
+        return backingList.listIterator();
+    }
+
+    @Override
+    public @NotNull ListIterator<E> listIterator(int index) {
+        return backingList.listIterator(index);
+    }
+
+    @Override
+    public @NotNull List<E> subList(int fromIndex, int toIndex) {
+        return new SortedArrayList<>(
+                backingList.subList(
+                        fromIndex,
+                        toIndex
+                ), comparator
+        );
     }
 }

@@ -28,16 +28,16 @@ import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
-import io.ib67.kiwi.event.util.SortedArraySet;
+import io.ib67.kiwi.event.util.SortedArrayList;
 import io.ib67.kiwi.routine.Interruption;
 
 import java.util.Comparator;
-import java.util.SortedSet;
+import java.util.List;
 
 public class SimpleEventBus implements EventBus {
-    protected final SortedSet<EventHandler<?>> handlers;
+    protected final List<EventHandler> handlers;
     public SimpleEventBus(int initialCapacity) {
-        this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(EventHandler::priority));
+        this.handlers = new SortedArrayList<>(initialCapacity, Comparator.comparingInt(EventHandler::priority));
     }
 
     @Override

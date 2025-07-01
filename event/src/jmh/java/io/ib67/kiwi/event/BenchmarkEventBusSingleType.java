@@ -97,12 +97,10 @@ public class BenchmarkEventBusSingleType {
         for (int i = 0; i < (numHandlers - wrongListenerNum); i++) {
             busTypedChaotic.register(correctType, this::handler);
         }
-        var random = new Random(1337);
-        var list = new ArrayList<>(busTypedChaotic.handlers);
-        Collections.shuffle(list, random);
         // what we did here is to shuffle listener randomly but not using their hashCode
         // since its(a lambda object) hashCode will change on a new run. We need to eliminate these random factors.
-        busTypedChaotic = new TypeAwareBus(Set.of(list.toArray(new TypeAwareBus.HandlerEntry[0])));
+        var random = new Random(1337);
+        Collections.shuffle(busTypedChaotic.handlers, random);
     }
 
     <E extends Event> void handler(E event) {

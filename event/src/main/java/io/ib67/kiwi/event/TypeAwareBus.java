@@ -28,48 +28,56 @@ import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
-import io.ib67.kiwi.event.util.SortedArraySet;
+import io.ib67.kiwi.event.util.SortedArrayList;
 import io.ib67.kiwi.routine.Interruption;
-import org.jetbrains.annotations.ApiStatus;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 class TypeAwareBus implements EventBus {
-    protected final Set<HandlerEntry> handlers;
+    private static final Predicate<Exception> ALWAYS_TRUE = e -> true;
+    protected final List<HandlerEntry> handlers;
     protected final Map<TypeToken<?>, TypeTokenSet> signatureCache;
-
-    /**
-     * This constructor is for JMH testing only.
-     */
-    @ApiStatus.Internal
-    TypeAwareBus(Set<HandlerEntry> handlers) {
-        this.handlers = handlers;
-        this.signatureCache = new HashMap<>();
-    }
+    protected final Predicate<Exception> exceptionHandler;
 
     public TypeAwareBus(int initialCapacity) {
-        this.handlers = new SortedArraySet<>(initialCapacity, Comparator.comparingInt(HandlerEntry::priority));
+        this(initialCapacity, ALWAYS_TRUE);
+    }
+
+    public TypeAwareBus(int initialCapacity, Predicate<Exception> exceptionHandler) {
+        this.handlers = new SortedArrayList<>(initialCapacity, Comparator.comparingInt(HandlerEntry::priority));
+        this.exceptionHandler = exceptionHandler;
         this.signatureCache = new HashMap<>();
     }
 
     @Override
     public boolean post(Event event) {
-        var eventType = event.type();
-        try {
-            var handlers = this.handlers;
-            for (var handler : handlers) {
-                var cache = handler.singatureCache();
-                var result = cache.get(eventType);
-                if (result == null) { // use null to represent value not present.
-                    result = eventType.assignableTo(handler.type());
-                    cache.put(eventType, result);
+        var index = 0;
+        while (index < handlers.size()) {
+            try {
+                for (index = 0; index < handlers.size(); index++) {
+                    var eventType = event.type();
+                    var handler = handlers.get(index);
+                    var cache = handler.singatureCache();
+                    var result = cache.get(eventType);
+                    if (result == null) { // use null to represent value not present.
+                        result = eventType.assignableTo(handler.type());
+                        cache.put(eventType, result);
+                    }
+                    if (result) handler.handler().handle(event);
                 }
-                if (result) handler.handler().handle(event);
+            } catch (Interruption ignored) {
+                return false;
+            } catch (Exception e) {
+                if (!exceptionHandler.test(e)) {
+                    return false;
+                }
             }
-            return true;
-        } catch (Interruption ignored) {
-            return false;
         }
+        return true;
     }
 
     @Override
