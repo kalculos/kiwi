@@ -24,6 +24,7 @@
 
 package io.ib67.kiwi.routine;
 
+import io.ib67.kiwi.closure.AnyFunction;
 import io.ib67.kiwi.closure.AnyRunnable;
 import io.ib67.kiwi.closure.AnySupplier;
 import org.jetbrains.annotations.ApiStatus;
@@ -39,15 +40,29 @@ import java.util.function.Supplier;
  * A Result represents the result of some operation, which can be success or failure.
  * For a success operation, this result is a {@link Some}. For the failed one, the result is a {@link Fail}<br />
  * You can also capture a checked exception as a Result by using {@link Result#fromAny(AnySupplier)} method.
+ *
  * @param <T> the type of success value
  */
 @ApiStatus.AvailableSince("1.0.0")
 public sealed interface Result<T> extends Uni<T> permits Fail, Some {
     /**
+     * Applies a closeable to mapper then close the closeable.
+     * @return some result from mapper, otherwise fail.
+     */
+    static <T, C extends AutoCloseable> Result<T> fromCloseable(C closeable, AnyFunction<C, T> mapper) {
+        try (var _c = closeable) {
+            return new Some<>(mapper.apply(closeable));
+        } catch (Exception e) {
+            return Fail.of(e);
+        }
+    }
+
+    /**
      * Captures an exception to make Fail, otherwise make {@link Some}
+     *
      * @param supplier operation
+     * @param <T>      type of result from operation
      * @return result
-     * @param <T> type of result from operation
      */
     static <T> Result<T> fromAny(AnySupplier<T> supplier) {
         try {
@@ -59,22 +74,24 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
 
     /**
      * Simliar to {@link #fromAny(AnySupplier)} but treats null as failure. When null is given, it returns {@link Fail#none()}
+     *
      * @param supplier operation
+     * @param <T>      type of result from operation
      * @return result
-     * @param <T> type of result from operation
      */
     static <T> Result<T> fromNotNull(AnySupplier<T> supplier) {
-        try{
+        try {
             var r = supplier.get();
-            if(r == null) return Fail.none();
+            if (r == null) return Fail.none();
             return new Some<>(r);
-        }catch (Exception e){
+        } catch (Exception e) {
             return Fail.of(e);
         }
     }
 
     /**
      * It captures an exception from the given runnable, otherwise {@link Some} null
+     *
      * @param runnable operation
      * @return result
      */
@@ -133,10 +150,10 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
 
     @Override
     default Result<T> filter(Predicate<? super T> predicate) {
-        if(this instanceof Fail) {
+        if (this instanceof Fail) {
             return this;
-        }else if(this instanceof Some(T t)){
-            if(predicate.test(t)){
+        } else if (this instanceof Some(T t)) {
+            if (predicate.test(t)) {
                 return this;
             }
         }
@@ -145,9 +162,9 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
 
     @Override
     default <M> Result<M> map(Function<? super T, M> mapper) {
-        if(this instanceof Fail f) {
+        if (this instanceof Fail f) {
             return f;
-        }else if(this instanceof Some(T t)){
+        } else if (this instanceof Some(T t)) {
             return new Some<>(mapper.apply(t));
         }
         throw new IllegalStateException("Impossible");
