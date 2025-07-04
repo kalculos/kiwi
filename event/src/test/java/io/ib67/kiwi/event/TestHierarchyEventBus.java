@@ -45,7 +45,7 @@ class TestHierarchyEventBus {
         boolean baseHandled = false;
 
         @Override
-        public TypeToken<?> type() {
+        public TypeToken<? extends Event> type() {
             return type;
         }
     }
@@ -55,7 +55,7 @@ class TestHierarchyEventBus {
         boolean childHandled = false;
 
         @Override
-        public TypeToken<?> type() {
+        public TypeToken<? extends Event> type() {
             return type;
         }
     }

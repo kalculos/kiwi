@@ -28,19 +28,11 @@ import io.ib67.kiwi.TypeToken;
 import io.ib67.kiwi.event.api.Event;
 import io.ib67.kiwi.event.api.EventBus;
 import io.ib67.kiwi.event.api.EventHandler;
-import io.ib67.kiwi.event.api.EventListenerHost;
-import io.ib67.kiwi.event.api.annotation.SubscribeEvent;
-import io.ib67.kiwi.event.util.AsmListenerResolver;
-import io.ib67.kiwi.event.util.EventTuple;
-import io.ib67.kiwi.event.util.ReflectionListenerResolver;
 import io.ib67.kiwi.routine.Interruption;
-import lombok.SneakyThrows;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
-import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode(Mode.AverageTime)
@@ -56,57 +48,67 @@ public class BenchmarkEventBusSingleType {
         }
     }
 
+    record TestEventB<T extends Event>(TypeToken<T> type) implements Event {
+    }
+
     @Param({"100"})
     public int numHandlers;
 
-    private TestEventA event;
+    @Param({"0.3", "0.6"})
+    public double wrongFactor;
+
+    private List<EventHandler<Event>> arrayHandlers;
+
+    private Event eventToDeliver;
+    private Event eventToChaoticDeliver;
     private EventBus busSimple;
-    private List<EventHandler<TestEventA>> arrayHandlers;
-    private EventBus busRuntimeGen;
-    private EventBus busMethodHandle;
+    private EventBus busTyped;
+    private EventBus busInterruption;
+    private TypeAwareBus busTypedChaotic;
 
     @Setup
-    @SneakyThrows
     public void setup() {
-        event = new TestEventA();
+        var eventUntyped = new TestEventA();
+        var eventTyped = new TestEventB<>(TypeToken.getParameterized(TestEventB.class, String.class));
         busSimple = new SimpleEventBus(numHandlers);
-        busRuntimeGen = new SimpleEventBus(numHandlers);
-        busMethodHandle = new SimpleEventBus(numHandlers);
+        busInterruption = new TypeAwareBus(numHandlers);
+        busTyped = new TypeAwareBus(numHandlers);
+        busTypedChaotic = new TypeAwareBus(numHandlers);
         arrayHandlers = new ArrayList<>();
+        eventToDeliver = eventUntyped;
         for (int i = 0; i < numHandlers; i++) {
-            busSimple.register(event.type(), this::handler);
+            busSimple.register(eventToDeliver.type(), this::handler);
             arrayHandlers.add(this::handler);
+            busTyped.register(eventToDeliver.type(), this::handler);
+            if (i == numHandlers - 1) {
+                busInterruption.register(eventToDeliver.type(), this::handlerInterrupting);
+            } else {
+                busInterruption.register(eventToDeliver.type(), this::handler);
+            }
         }
 
-        var lookup = MethodHandles.privateLookupIn(SimpleListener.class, MethodHandles.lookup());
-        var listenerHost = new SimpleListener();
-        for (int i = 0; i < numHandlers; i++) {
-            /*
-             * Duplicate multiple handlers to avoid inlining. Especially for codegen resolver
-             */
-            var handlersGen = new AsmListenerResolver(lookup, listenerHost).resolveHandlers();
-            var handlersMH = new ReflectionListenerResolver(lookup, listenerHost).resolveHandlers();
-            ((EventHandler<TestEventA>) handlersGen.getFirst().handler()).handle(event);
-            ((EventHandler<TestEventA>) handlersMH.getFirst().handler()).handle(event); // preload method handle
-            for (var _entry : handlersGen) {
-                var entry = (EventTuple<Event>) _entry;
-                busRuntimeGen.register(entry.type(), entry.handler());
-            }
-            for (var _entry : handlersMH) {
-                var entry = (EventTuple<Event>) _entry;
-                busMethodHandle.register(entry.type(), entry.handler());
-            }
+        int wrongListenerNum = (int) (wrongFactor * numHandlers);
+        var wrongType = TypeToken.getParameterized(TestEventB.class, Integer.class);
+        for (int i = 0; i < wrongListenerNum; i++) {
+            busTypedChaotic.register(wrongType, this::handler);
         }
+        var correctType = eventTyped.type();
+        eventToChaoticDeliver = eventTyped;
+        for (int i = 0; i < (numHandlers - wrongListenerNum); i++) {
+            busTypedChaotic.register(correctType, this::handler);
+        }
+        // what we did here is to shuffle listener randomly but not using their hashCode
+        // since its(a lambda object) hashCode will change on a new run. We need to eliminate these random factors.
+        var random = new Random(1337);
+        Collections.shuffle(busTypedChaotic.handlers, random);
     }
 
-    void handler(TestEventA event) {
+    <E extends Event> void handler(E event) {
         Blackhole.consumeCPU(10);
     }
 
-    @Benchmark
-    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void deliverEventBus() {
-        busSimple.post(event);
+    <E extends Event> void handlerInterrupting(E event) throws Interruption {
+        throw Interruption.INTERRUPTION;
     }
 
     @Benchmark
@@ -115,7 +117,7 @@ public class BenchmarkEventBusSingleType {
         try {
             var handlers = this.arrayHandlers;
             for (int i = 0; i < handlers.size(); i++) {
-                handlers.get(i).handle(event);
+                handlers.get(i).handle(eventToDeliver);
             }
         } catch (Interruption e) {
             throw new RuntimeException(e);
@@ -124,20 +126,25 @@ public class BenchmarkEventBusSingleType {
 
     @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void deliverEventCodeGen() {
-        busRuntimeGen.post(event);
+    public void deliverEventSimple() {
+        busSimple.post(eventToDeliver);
     }
 
     @Benchmark
     @CompilerControl(CompilerControl.Mode.DONT_INLINE)
-    public void deliverEventMethodHandle() {
-        busMethodHandle.post(event);
+    public void deliverEventTyped() {
+        busTyped.post(eventToDeliver);
     }
 
-    static class SimpleListener implements EventListenerHost {
-        @SubscribeEvent
-        public void onEvent(TestEventA event) {
-            Blackhole.consumeCPU(10);
-        }
+    @Benchmark
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public void deliverEventTypedChaotic() {
+        busTypedChaotic.post(eventToChaoticDeliver);
+    }
+
+    @Benchmark
+    @CompilerControl(CompilerControl.Mode.DONT_INLINE)
+    public void deliverEventInterrupting() {
+        busInterruption.post(eventToChaoticDeliver);
     }
 }

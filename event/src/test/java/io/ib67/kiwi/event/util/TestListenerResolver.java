@@ -63,7 +63,7 @@ class TestListenerResolver implements Opcodes {
 
     static class TestEvent implements Event {
         @Override
-        public TypeToken<?> type() {
+        public TypeToken<? extends Event> type() {
             return null;
         }
     }

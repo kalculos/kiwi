@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestSingleTypedEventBus {
-    private SimpleEventBus eventBus;
+    private TypeAwareBus eventBus;
     private TypeToken<TestEvent> eventType;
 
     static class TestEvent implements Event {
@@ -42,7 +42,7 @@ class TestSingleTypedEventBus {
         boolean handled = false;
 
         @Override
-        public TypeToken<?> type() {
+        public TypeToken<? extends Event> type() {
             return type;
         }
     }
@@ -51,7 +51,7 @@ class TestSingleTypedEventBus {
         private final TypeToken<TestInterruptingEvent> type = TypeToken.resolve(TestInterruptingEvent.class);
 
         @Override
-        public TypeToken<?> type() {
+        public TypeToken<? extends Event> type() {
             return type;
         }
     }
@@ -59,7 +59,7 @@ class TestSingleTypedEventBus {
     @BeforeEach
     void setUp() {
         eventType = TypeToken.resolve(TestEvent.class);
-        eventBus = new SimpleEventBus(4);
+        eventBus = new TypeAwareBus(4);
     }
 
     @Test

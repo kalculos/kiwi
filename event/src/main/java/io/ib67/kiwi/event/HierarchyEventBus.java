@@ -75,8 +75,8 @@ public class HierarchyEventBus implements EventBus {
         }
     }
 
-    SimpleEventBus createBus(TypeToken<?> type) {
-        return new SimpleEventBus(4);
+    TypeAwareBus createBus(TypeToken<?> type) {
+        return new TypeAwareBus(4);
     }
 
     protected ChainedBus locateBusOrCreate(Deque<Type> deque, TypeToken<?> typeToken) {

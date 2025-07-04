@@ -33,11 +33,11 @@ import java.util.Comparator;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestSortedArraySet {
-    private SortedArraySet<Integer> set;
+    private SortedArrayList<Integer> set;
 
     @BeforeEach
     void setUp() {
-        set = new SortedArraySet<>(10, Comparator.naturalOrder());
+        set = new SortedArrayList<>(10, Comparator.naturalOrder());
     }
 
     @Test
@@ -61,9 +61,8 @@ class TestSortedArraySet {
         set.add(1);
         set.add(2);
         set.add(3);
-
-        assertTrue(set.remove(2));
-        assertFalse(set.remove(4));
+        assertTrue(set.remove((Object)2));
+        assertFalse(set.remove((Object)4));
         assertEquals(2, set.size());
     }
 
@@ -73,51 +72,8 @@ class TestSortedArraySet {
         set.add(1);
         set.add(2);
 
-        assertEquals(1, set.first());
-        assertEquals(3, set.last());
-    }
-
-    @Test
-    void testSubSet() {
-        set.add(1);
-        set.add(2);
-        set.add(3);
-        set.add(4);
-        set.add(5);
-
-        var subset = set.subSet(2, 4);
-        assertEquals(2, subset.size());
-        assertTrue(subset.contains(2));
-        assertTrue(subset.contains(3));
-    }
-
-    @Test
-    void testHeadSet() {
-        set.add(1);
-        set.add(2);
-        set.add(3);
-        set.add(4);
-        set.add(5);
-
-        var headSet = set.headSet(3);
-        assertEquals(2, headSet.size());
-        assertTrue(headSet.contains(1));
-        assertTrue(headSet.contains(2));
-    }
-
-    @Test
-    void testTailSet() {
-        set.add(1);
-        set.add(2);
-        set.add(3);
-        set.add(4);
-        set.add(5);
-
-        var tailSet = set.tailSet(3);
-        assertEquals(3, tailSet.size());
-        assertTrue(tailSet.contains(3));
-        assertTrue(tailSet.contains(4));
-        assertTrue(tailSet.contains(5));
+        assertEquals(1, set.getFirst());
+        assertEquals(3, set.getLast());
     }
 
     @Test

@@ -33,9 +33,9 @@ import org.jetbrains.annotations.NotNull;
  */
 @ApiStatus.AvailableSince("0.1.0")
 public interface Event {
-    ClassValue<TypeToken<?>> RAW_TOKENS = new ClassValue<>() {
+    ClassValue<TypeToken<? extends Event>> RAW_TOKENS = new ClassValue<>() {
         @Override
-        protected TypeToken<?> computeValue(@NotNull Class<?> type) {
+        protected TypeToken<? extends Event> computeValue(@NotNull Class<?> type) {
             return TypeToken.resolve(type);
         }
     };
@@ -43,7 +43,7 @@ public interface Event {
      * TypeToken of the Event. it may depend on some information gathered from an instance of Event.
      * @return TypeToken of the Event.
      */
-    default TypeToken<?> type(){
+    default TypeToken<? extends Event> type(){
         return RAW_TOKENS.get(this.getClass());
     }
 }
