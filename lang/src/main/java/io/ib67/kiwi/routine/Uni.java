@@ -31,12 +31,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
  * A Consumer of Consumer. For detailed explanation, please refer to <a href="https://kalculos.github.io/document/kiwi/uni/">documentation</a>
+ *
  * @param <T>
  */
 public interface Uni<T> {
@@ -106,6 +109,10 @@ public interface Uni<T> {
         return c -> accept(t -> c.onValue(mapper.apply(t)));
     }
 
+    default <M> Uni<Result<M>> mapFallible(Function<? super T, M> mapper) {
+        return c -> accept(t -> c.onValue(Result.fromAny(() -> mapper.apply(t))));
+    }
+
     default Uni<T> forFirst(UnaryOperator<T> mapper) { //todo test
         var isFirst = new boolean[]{true};
         return c -> accept(t -> {
@@ -151,6 +158,37 @@ public interface Uni<T> {
                 }
             });
         };
+    }
+
+    default Uni<T> merge(Uni<T> uni) {
+        return c -> {
+            onItem(c);
+            uni.onItem(c);
+        };
+    }
+
+    default Result<T> last(Predicate<? super T> predicate) {
+        var result = new AtomicReference<T>(null);
+        var hasAnswer = new AtomicBoolean(false);
+        try {
+            filter(predicate).peek(it -> hasAnswer.set(true)).accept(result::set);
+        } catch (Interruption ignored) {
+        }
+        if (hasAnswer.get()) {
+            return new Some<>(result.get());
+        }
+        return Fail.none();
+    }
+
+    default Result<T> first(Predicate<? super T> predicate) {
+        var hasAnswer = new AtomicBoolean(false);
+        var result = filter(predicate).peek(it -> hasAnswer.set(true)).takeOne();
+        if (hasAnswer.get()) return new Some<>(result);
+        return Fail.none();
+    }
+
+    default <M> Uni<M> filterInstance(Class<M> type){
+        return (Uni<M>) filter(it->it != null && type.isAssignableFrom(it.getClass()));
     }
 
     default Uni<T> peek(InterruptibleConsumer<T> consumer) {
@@ -214,9 +252,18 @@ public interface Uni<T> {
             var result = new Object[]{identity};
             try {
                 accept(t -> result[0] = reducer.apply((T) result[0], t));
-            } catch (Interruption ignored) {}
+            } catch (Interruption ignored) {
+            }
             c.onValue((T) result[0]);
         };
+    }
+
+    default Result<T> last() {
+        return last(i -> true);
+    }
+
+    default Result<T> first() {
+        return first(i -> true);
     }
 
     @Nullable

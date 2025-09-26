@@ -47,6 +47,7 @@ import java.util.function.Supplier;
 public sealed interface Result<T> extends Uni<T> permits Fail, Some {
     /**
      * Applies a closeable to mapper then close the closeable.
+     *
      * @return some result from mapper, otherwise fail.
      */
     static <T, C extends AutoCloseable> Result<T> fromCloseable(C closeable, AnyFunction<C, T> mapper) {
@@ -142,6 +143,20 @@ public sealed interface Result<T> extends Uni<T> permits Fail, Some {
             failConsumer.accept((Fail) this);
         }
         return this;
+    }
+
+    default Result<T> onSuccess(InterruptibleConsumer<T> consumer) {
+        if (this instanceof Some(T t)) {
+            consumer.accept(t);
+        }
+        return this;
+    }
+
+    default <M> Result<M> flatMapResult(Function<T, Result<M>> resultMapper) {
+        if (this instanceof Some(T t)) {
+            return resultMapper.apply(t);
+        }
+        return (Result<M>) this;
     }
 
     default Optional<T> toOptional() {

@@ -180,7 +180,7 @@ public class ArgOpts {
     }
 
     private void formatDescription(PrintStream out, String prefix, String description, Object defaultValue) {
-        int maxLineLength = 32;
+        int maxLineLength = 256;
         if (description.length() <= maxLineLength) {
             out.println(description + " (default: " + defaultValue + ")");
             return;
